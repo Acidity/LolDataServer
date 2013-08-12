@@ -54,7 +54,7 @@ public class LoLRTMPSClient extends RTMPSClient
 	 * 
 	 * @param args Unused
 	 */
-	public static void main(String[] args)
+/*	public static void main(String[] args)
 	{
 		LoLRTMPSClient client = new LoLRTMPSClient("VN", "1.70.FOOBAR", "jabetest1", "jabetest1");
 		//client.debug = true;
