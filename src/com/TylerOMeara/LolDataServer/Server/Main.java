@@ -38,7 +38,9 @@ public class Main
 		if(args.length == 0)
 		{
 			System.out.println("You must provide at least 1 username and password.");
-			return;
+			//TODO: DEBUG CODE
+
+			//return;
 		}
 		
 		//Loops through the arguments and creates a new client for each username password pair.
@@ -61,6 +63,18 @@ public class Main
 				HashMap<String, LoLRTMPSClient> region = PvPNetClients.get(xsplit[0]);
 				//Creates a new client object for this particular username/pass combo
 				LoLRTMPSClient client = new LoLRTMPSClient(xsplit[0], PvPNetVersion, xsplit[1], xsplit[2]);
+				try 
+				{
+					client.connectAndLogin();
+				} 
+				catch (IOException e) 
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//TODO DEBUG CODE
+				System.out.println("Connected to " + xsplit[0] + " with username: " + xsplit[1]);
+				
 				//Adds client to region hashmap
 				region.put(xsplit[1], client);
 				//Adds region hashmap to global clients hashmap
@@ -72,10 +86,24 @@ public class Main
 				HashMap<String, LoLRTMPSClient> region = new HashMap<String, LoLRTMPSClient>();
 				//Creates a new client object for this particular username/pass combo
 				LoLRTMPSClient client = new LoLRTMPSClient(xsplit[0], PvPNetVersion, xsplit[1], xsplit[2]);
+				try 
+				{
+					client.connectAndLogin();
+				} 
+				catch (IOException e) 
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//TODO DEBUG CODE
+				System.out.println("Connected to " + xsplit[0] + " with username: " + xsplit[1]);
 				//Adds client to region hashmap
 				region.put(xsplit[1], client);
 				//Adds region hashmap to global clients hashmap
 				PvPNetClients.put(xsplit[0], region);
+				
+				//TODO DEBUG CODE
+				LoadBalancer.clients.put(xsplit[0], client);
 			}
 		}
 		

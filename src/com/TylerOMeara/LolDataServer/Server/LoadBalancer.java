@@ -1,17 +1,21 @@
 package com.TylerOMeara.LolDataServer.Server;
 
+import java.util.HashMap;
+
 import com.gvaneyck.rtmp.LoLRTMPSClient;
 
 public class LoadBalancer 
 {
+	public static HashMap<String, LoLRTMPSClient> clients = new HashMap<String, LoLRTMPSClient>();
+	
 	/**
 	 * Returns a client from the specified region.
 	 * @param region
 	 * @return
 	 */
-	public LoLRTMPSClient returnClient(String region)
+	public static LoLRTMPSClient returnClient(String region)
 	{
-		return Main.PvPNetClients.get(region).values().iterator().next();
+		return clients.get(region);
 		//TODO: Actually loadbalance
 	}
 }

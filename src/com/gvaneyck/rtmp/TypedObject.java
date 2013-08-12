@@ -127,7 +127,7 @@ public class TypedObject extends HashMap<String, Object>
 		else
 			return (Object[])get(key);
 	}
-	
+
 	/**
 	 * Convenience for retrieving Date objects
 	 * 

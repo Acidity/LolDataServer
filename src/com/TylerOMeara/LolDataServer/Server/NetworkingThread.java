@@ -26,9 +26,13 @@ public class NetworkingThread extends Thread
 			BufferedWriter oWriter = new BufferedWriter(output);
 			//Blocks until it receives the request from the client
 			String line = iReader.readLine();
-			String response = API.manualRequest(line);
+			//TODO: DEBUG CODE
+			String response = API.getRankedStats("NA",44001109,"CLASSIC","CURRENT");
+			//String response = API.manualRequest(line);
 			//TODO handle API messages
 			oWriter.write(response);
+			//TODO DEBUG CODE
+			System.out.println(response);
 			
 		}
 		catch(IOException e)
