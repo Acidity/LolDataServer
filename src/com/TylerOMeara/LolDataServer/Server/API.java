@@ -35,19 +35,46 @@ public class API
 		}
 	}
 	
+	public static String getSummonerByName(String region, String name)
+	{
+		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		try 
+		{
+			int id = client.invoke("summonerService", "getSummonerByName", new Object[] {name});
+			TypedObject data = client.getResult(id).getTO("data").getTO("body");
+			String json = "{\"Name\":\"" + data.getString("name"); //Adds name to JSON
+			json += "\", \"InternalName\":\"" + data.getString("internalName") + "\","; //Adds internalName to JSON
+			json += "\"DataVersion\":" + data.getInt("dataVersion") + ",";
+			json += "\"AccountID\":" + data.getDouble("acctId") + ",";
+			json += "\"ProfileIconID\":" + data.getInt("profileIconId") + ",";
+			json += "\"RevisionDate\":\"" + data.getDate("revisionDate").toString() + "\",";
+			json += "\"RevisionID\":" + data.getDouble("revisionId") + ",";
+			json += "\"FutureData\":\"" + data.getString("futureData") + "\",";
+			json += "\"SummonerID\":" + data.getDouble("SummonerID") + ",";
+			json += "\"SummonerLevel\":" + data.getInt("summonerLevel") + "}";
+			return json;
+		} 
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	/**
 	 * playerStatsService
 	 * getAggregatedStats
 	 * @return
 	 */
-	
-	public static String getRankedStats(String region, int acctID, String GameMode, String Season)
+	//TODO Check for null
+	public static String getRankedStats(String region, int acctID, String gameMode, String season)
 	{
 		HashMap<Integer, HashMap<String, Double>> champions = new HashMap<Integer, HashMap<String, Double>>();
 		LoLRTMPSClient client = LoadBalancer.returnClient(region);
 		try 
 		{
-			int id = client.invoke("playerStatsService", "getAggregatedStats", new Object[] {44001109,"CLASSIC","CURRENT"});
+			int id = client.invoke("playerStatsService", "getAggregatedStats", new Object[] {acctID,gameMode,season});
 			Object[] array = (client.getResult(id).getTO("data").getTO("body").getArray("lifetimeStatistics"));
 			for(Object x : array)
 			{
@@ -67,6 +94,7 @@ public class API
 					}
 				}
 			}
+			//Generates the JSON from collected data
 			String json = "{";
 			for(int x : champions.keySet())
 			{
