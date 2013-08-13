@@ -27,7 +27,7 @@ public class NetworkingThread extends Thread
 			//Blocks until it receives the request from the client
 			String line = iReader.readLine();
 			//TODO: DEBUG CODE
-			String response = API.getSummonerByName("NA","");
+			String response = API.getInGameProgressInfo("NA", "");
 			//String response = API.getRankedStats("NA",44001109,"CLASSIC","CURRENT");
 			//String response = API.manualRequest(line);
 			//TODO handle API messages
