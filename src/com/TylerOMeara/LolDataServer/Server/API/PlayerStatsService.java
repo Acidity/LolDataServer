@@ -9,23 +9,23 @@ import com.gvaneyck.rtmp.TypedObject;
 
 public class PlayerStatsService 
 {
-	public static String getRecentMatchHistory(String region, int accountID)
+	public static String getRecentGames(String region, int accountID)
 	{
 		return BaseMethods.genericAPICall(region, "playerStatsService", "getRecentGames", new Object[] {accountID});
 	}
 	
-	public static String getPlayerStatsByAccount(String region, int accountID)
+	public static String getPlayerStatsByAccountID(String region, int accountID)
 	{
 		return BaseMethods.genericAPICall(region, "playerStatsService", "retrievePlayerStatsByAccountId", new Object[]{accountID});
 	}
 	
-	public static String getRankedStats(String region, int acctID, String gameMode, String season)
+	public static String getRankedStats(String region, int accountID, String gameMode, String season)
 	{
 		HashMap<Integer, HashMap<String, Double>> champions = new HashMap<Integer, HashMap<String, Double>>();
 		LoLRTMPSClient client = LoadBalancer.returnClient(region);
 		try 
 		{
-			int id = client.invoke("playerStatsService", "getAggregatedStats", new Object[] {acctID,gameMode,season});
+			int id = client.invoke("playerStatsService", "getAggregatedStats", new Object[] {accountID,gameMode,season});
 			Object[] array = (client.getResult(id).getTO("data").getTO("body").getArray("lifetimeStatistics"));
 			for(Object x : array)
 			{

@@ -2,7 +2,7 @@ package com.TylerOMeara.LolDataServer.Server.API;
 
 public class LeaguesServiceProxy 
 {
-	public static String getLeagueData(String region, int summonerID, String queue)
+	public static String getLeagueForPlayer(String region, int summonerID, String queue)
 	{
 		return BaseMethods.genericAPICall(region, "leaguesServiceProxy", "getLeagueForPlayer", new Object[] {summonerID, queue});
 	}
