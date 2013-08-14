@@ -1,6 +1,7 @@
 package com.TylerOMeara.LolDataServer.Server;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 
 import com.gvaneyck.rtmp.LoLRTMPSClient;
@@ -36,6 +37,32 @@ public class API
 		}
 	}
 	
+	public static String getRecentMatchHistory(String region, int accountID)
+	{
+
+		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		try 
+		{
+			String json = "{";
+			int id = client.invoke("playerStatsService", "getRecentGames", new Object[] {accountID});
+			TypedObject data = client.getResult(id);//.getTO("data").getTO("body");
+			for(String x : data.keySet())
+			{
+				json = addObject(json, data, x);
+			}
+			json = json.substring(0,json.length()-1);
+			json += "}";
+			//System.out.println(String.valueOf(data));
+			return json;
+		}
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public static String getSummonerByName(String region, String name)
 	{
 		LoLRTMPSClient client = LoadBalancer.returnClient(region);
@@ -63,7 +90,7 @@ public class API
 		return null;
 	}
 	
-	public static String getInGameProgressInfo(String region, String name)
+	/*public static String getInGameProgressInfo(String region, String name)
 	{
 		LoLRTMPSClient client = LoadBalancer.returnClient(region);
 		try 
@@ -244,6 +271,84 @@ public class API
 			e.printStackTrace();
 		}
 		return null;
+	}*/
+	
+	public static String getInGameProgressInfo(String region, String name)
+	{
+		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		try 
+		{
+			String json = "{";
+			int id = client.invoke("gameService", "retrieveInProgressSpectatorGameInfo", new Object[] {name});
+			TypedObject data = client.getResult(id).getTO("data").getTO("body");
+			if(data == null)
+			{
+				System.out.println("Player is most likely not in a game.");
+				return null;
+			}
+			for(String x : data.keySet())
+			{
+				json = addObject(json, data, x);
+			}
+			json = json.substring(0,json.length()-1);
+			json += "}";
+			return json;
+		}
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static String getLeagueData(String region, int summonerID, String queue)
+	{
+		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		try 
+		{
+			String json = "{";
+			int id = client.invoke("leaguesServiceProxy", "getLeagueForPlayer", new Object[] {summonerID,queue});
+			TypedObject data = client.getResult(id);//.getTO("data").getTO("body");
+			for(String x : data.keySet())
+			{
+				json = addObject(json, data, x);
+			}
+			json = json.substring(0,json.length()-1);
+			json += "}";
+			return json;
+		}
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static String getSummonersByIDs(String region, Object[] summonerIDs)
+	{
+		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		try 
+		{
+			String json = "{";
+			int id = client.invoke("summonerService", "getSummonerNames", new Object[]{summonerIDs});
+			TypedObject data = client.getResult(id);//.getTO("data").getTO("body");
+			for(String x : data.keySet())
+			{
+				json = addObject(json, data, x);
+			}
+			json = json.substring(0,json.length()-1);
+			json += "}";
+			return json;
+			//return String.valueOf(client.getResult(id).getTO("data").get("clientIdBytes").getClass());
+		}
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	/**
@@ -300,5 +405,211 @@ public class API
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static String getAllPublicSummonerDataByAccount(String region, int accountID)
+	{
+		
+		return null;
+	}
+	
+/*	private static String genericAPICall(String region, String service, String operation, Object[] args)
+	{
+		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		try 
+		{
+			String json = "{";
+			int id = client.invoke("summonerService", "getSummonerNames", new Object[]{summonerIDs});
+			TypedObject data = client.getResult(id);//.getTO("data").getTO("body");
+			for(String x : data.keySet())
+			{
+				json = addObject(json, data, x);
+			}
+			json = json.substring(0,json.length()-1);
+			json += "}";
+			return json;
+			//return String.valueOf(client.getResult(id).getTO("data").get("clientIdBytes").getClass());
+		}
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}*/
+	
+	private static String addObject(String json, TypedObject data, String x)
+	{
+		json += "\"" + x + "\":";
+		if(data.get(x) == null)
+		{
+			json += "\"null\","; 
+		}
+		if(data.get(x) instanceof Integer)
+		{
+			json += data.getInt(x) + ",";
+			return json;
+		}
+		if(data.get(x) instanceof Double)
+		{
+			json += data.getDouble(x) + ",";
+			return json;
+		}
+		if(data.get(x) instanceof Boolean)
+		{
+			json += data.getBool(x) + ",";
+			return json;
+		}
+		if(data.get(x) instanceof String)
+		{
+			json += "\"" + data.getString(x) + "\",";
+			return json;
+		}
+		if(data.get(x) instanceof Date)
+		{
+			json += "\"" + data.getDate(x) + "\",";
+			return json;
+		}
+		if(data.get(x) instanceof Byte)
+		{
+			json += "\"" + String.valueOf(data.get(x)) + "\",";
+			return json;
+		}
+		//Need to check if it is an array manually because data.get(x) returns a TypedObject even when it is an Array
+		if(!isArray(data, x) && data.get(x) instanceof TypedObject)
+		{
+			json += "{";
+			for(String s : data.getTO(x).keySet())
+			{
+				json = addObject(json, data.getTO(x), s);
+			}
+			json = json.substring(0,json.length()-1);
+			json += "},";
+			return json;
+		}
+		if(data.get(x) instanceof byte[])
+		{
+			byte[] array = (byte[]) data.get(x);
+			json += "[";
+			for(Object o : array)
+			{
+				json = addArrayObject(json, o);
+			}
+			if(array.length != 0)
+			{
+				json = json.substring(0,json.length()-1);
+			}
+			json += "],";
+			return json;
+		}
+		if(data.get(x) instanceof Object[] || isArray(data, x))
+		{
+			Object[] array = data.getArray(x);
+			json += "[";
+			for(Object o : array)
+			{
+				json = addArrayObject(json, o);
+			}
+			if(array.length != 0)
+			{
+				json = json.substring(0,json.length()-1);
+			}
+			json += "],";
+			return json;
+		}
+		
+		return json;
+	}
+	
+	private static String addArrayObject(String json, Object o)
+	{
+		if(o == null)
+		{
+			json += "\"null\","; 
+		}
+		if(o instanceof Integer)
+		{
+			json += o + ",";
+			return json;
+		}
+		if(o instanceof Double)
+		{
+			json += o + ",";
+			return json;
+		}
+		if(o instanceof Boolean)
+		{
+			json += o + ",";
+			return json;
+		}
+		if(o instanceof String)
+		{
+			json += "\"" + o + "\",";
+			return json;
+		}
+		if(o instanceof Date)
+		{
+			json += "\"" + o + "\",";
+			return json;
+		}
+		if(o instanceof Byte)
+		{
+			json += "\"" + String.valueOf(o) + "\",";
+			return json;
+		}
+		if(o instanceof TypedObject)
+		{
+			json += "{";
+			for(String s : ((TypedObject)o).keySet())
+			{
+				json = addObject(json, ((TypedObject)o), s);
+			}
+			json = json.substring(0,json.length()-1);
+			json += "},";
+			return json;
+		}
+		if(o instanceof byte[])
+		{
+			byte[] array = (byte[]) o;
+			json += "[";
+			for(Object j : array)
+			{
+				json = addArrayObject(json, j);
+			}
+			if(array.length != 0)
+			{
+				json = json.substring(0,json.length()-1);
+			}
+			json += "],";
+			return json;
+		}
+		if(o instanceof Object[])
+		{
+			Object[] array = (Object[])o;
+			json += "[";
+			for(Object j : array)
+			{
+				json = addArrayObject(json, j);
+			}
+			json += "],";
+			return json;
+		}
+		
+		return json;
+	}
+	
+	private static boolean isArray(TypedObject data, String x)
+	{
+		try{
+			if(data.getArray(x) == null)
+			{
+				return false;
+			}
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+		return true;
 	}
 }
