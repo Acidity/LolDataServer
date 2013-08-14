@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+import com.TylerOMeara.LolDataServer.Server.API.ClientFacadeService;
+
 public class NetworkingThread extends Thread
 {
 	private Socket socket;
@@ -27,9 +29,7 @@ public class NetworkingThread extends Thread
 			//Blocks until it receives the request from the client
 			String line = iReader.readLine();
 			//TODO: DEBUG CODE
-			//String response = API.genericRawOutput("NA", "clientFacadeService", "getLoginDataPacketForUser", new Object[0]);
-			String response = API.getLoginDataPacketForUser("NA");
-
+			
 			//TODO handle API messages
 			oWriter.write(response);
 			//TODO DEBUG CODE
