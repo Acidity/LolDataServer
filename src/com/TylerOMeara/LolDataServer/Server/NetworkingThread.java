@@ -28,7 +28,6 @@ public class NetworkingThread extends Thread
 			String line = iReader.readLine();
 			//TODO: DEBUG CODE
 
-			String response = API.manualRequest(line);
 			//TODO handle API messages
 			oWriter.write(response);
 			//TODO DEBUG CODE

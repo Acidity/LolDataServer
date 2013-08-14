@@ -40,7 +40,6 @@ public class Main
 			System.out.println("You must provide at least 1 username and password.");
 			//TODO: DEBUG CODE
 			args = new String[1];
-			args[0] = "NA::BLAHADFSGFHGREAW::42c6LdSYLK7CJHiN";
 			//return;
 		}
 		
