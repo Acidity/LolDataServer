@@ -37,31 +37,6 @@ public class API
 		}
 	}
 	
-	public static String getRecentMatchHistory(String region, int accountID)
-	{
-		return genericAPICall(region, "playerStatsService", "getRecentGames", new Object[] {accountID});
-	}
-	
-	public static String getSummonerByName(String region, String name)
-	{
-		return genericAPICall(region, "summonerService", "getSummonerByName", new Object[] {name});
-	}
-	
-	public static String getInGameProgressInfo(String region, String name)
-	{
-		return genericAPICall(region, "gameService", "retrieveInProgressSpectatorGameInfo", new Object[] {name});
-	}
-	
-	public static String getLeagueData(String region, int summonerID, String queue)
-	{
-		return genericAPICall(region, "LeaguesServiceProxy", "getLeagueForPlayer", new Object[] {summonerID,queue});
-	}
-	
-	public static String getSummonersByIDs(String region, Object[] summonerIDs)
-	{
-		return genericAPICall(region, "summonerService", "getSummonerNames", new Object[]{summonerIDs});
-	}
-	
 	/**
 	 * playerStatsService
 	 * getAggregatedStats
@@ -118,11 +93,6 @@ public class API
 		}
 	}
 	
-	public static String getAllPublicSummonerDataByAccount(String region, int accountID)
-	{
-		return genericAPICall(region, "summonerService", "getAllPublicSummonerDataByAccount", new Object[]{accountID});
-	}
-	
 	private static String genericAPICall(String region, String service, String operation, Object[] args)
 	{
 		LoLRTMPSClient client = LoadBalancer.returnClient(region);
@@ -145,6 +115,77 @@ public class API
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static String genericRawOutput(String region, String service, String operation, Object[] args)
+	{
+		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		try 
+		{
+			int id = client.invoke(service, operation, args);
+			return String.valueOf(client.getResult(id));
+		}
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static String getRecentMatchHistory(String region, int accountID)
+	{
+		return genericAPICall(region, "playerStatsService", "getRecentGames", new Object[] {accountID});
+	}
+	
+	public static String getSummonerByName(String region, String name)
+	{
+		return genericAPICall(region, "summonerService", "getSummonerByName", new Object[] {name});
+	}
+	
+	public static String getInGameProgressInfo(String region, String name)
+	{
+		return genericAPICall(region, "gameService", "retrieveInProgressSpectatorGameInfo", new Object[] {name});
+	}
+	
+	public static String getLeagueData(String region, int summonerID, String queue)
+	{
+		return genericAPICall(region, "LeaguesServiceProxy", "getLeagueForPlayer", new Object[] {summonerID,queue});
+	}
+	
+	public static String getSummonersByIDs(String region, Object[] summonerIDs)
+	{
+		return genericAPICall(region, "summonerService", "getSummonerNames", new Object[]{summonerIDs});
+	}
+	
+	public static String getAllPublicSummonerDataByAccount(String region, int accountID)
+	{
+		return genericAPICall(region, "summonerService", "getAllPublicSummonerDataByAccount", new Object[]{accountID});
+	}
+	
+	public static String getAllSummonerDataByAccount(String region, int accountID)
+	{
+		return genericAPICall(region, "summonerService", "getAllSummonerDataByAccount", new Object[]{accountID});
+	}
+	
+	public static String getPlayerStatsByAccount(String region, int accountID)
+	{
+		return genericAPICall(region, "playerStatsService", "retrievePlayerStatsByAccountId", new Object[]{accountID});
+	}
+	
+	public static String getPlayerRankedTeams(String region, int summonerID)
+	{
+		return genericAPICall(region, "summonerTeamService", "findPlayer", new Object[]{summonerID});
+	}
+	
+	public static String getAllLeaguesForPlayer(String region, int summonerID)
+	{
+		return genericAPICall(region, "leaguesServiceProxy", "getAllLeaguesForPlayer", new Object[]{summonerID});
+	}
+	
+	public static String getLoginDataPacketForUser(String region)
+	{
+		return genericAPICall(region, "clientFacadeService", "getLoginDataPacketForUser", new Object[0]);
 	}
 	
 	private static String addObject(String json, TypedObject data, String x)
@@ -192,7 +233,10 @@ public class API
 			{
 				json = addObject(json, data.getTO(x), s);
 			}
-			json = json.substring(0,json.length()-1);
+			if(data.getTO(x).size() > 0)
+			{
+				json = json.substring(0,json.length()-1);
+			}
 			json += "},";
 			return json;
 		}
@@ -273,7 +317,10 @@ public class API
 			{
 				json = addObject(json, ((TypedObject)o), s);
 			}
-			json = json.substring(0,json.length()-1);
+			if(((TypedObject)o).size() > 0)
+			{
+				json = json.substring(0,json.length()-1);
+			}
 			json += "},";
 			return json;
 		}
