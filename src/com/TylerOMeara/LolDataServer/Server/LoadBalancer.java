@@ -21,6 +21,7 @@ public class LoadBalancer
 	{
 		int numClients = PvPNetClients.get(region).values().size();
 		LoLRTMPSClient client = (LoLRTMPSClient) PvPNetClients.get(region).values().toArray()[(int)(Math.random()*numClients)];
+		//TODO Debug code
 		System.out.println("Loadbalancer returned " + region + "::" + client.getUserName());
 		return client;
 	}

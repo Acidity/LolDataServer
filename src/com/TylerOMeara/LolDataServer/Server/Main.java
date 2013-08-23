@@ -3,9 +3,9 @@ package com.TylerOMeara.LolDataServer.Server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.ArrayList;
 
-import com.gvaneyck.rtmp.LoLRTMPSClient;
+//TODO Add ability to require authentication before returning data
 
 public class Main 
 {
@@ -19,6 +19,7 @@ public class Main
 	 * Stores the PvP.Net version that the clients should use when connecting to League's servers.
 	 */
 	//TODO:Make Variable based on region
+	//TODO Allow admins to specify
 	public static String PvPNetVersion = "3.10.13_08_21_11_50";
 	
 	public static LoadBalancer loadBalancer = new LoadBalancer();
@@ -36,27 +37,29 @@ public class Main
 		{
 			System.out.println("You must provide at least 1 username and password.");
 			//TODO: DEBUG CODE
-			args = new String[2];
-
+			args = new String[10];
 			//return;
 		}
-		int y = 1;
 		//Loops through the arguments and creates a new client for each username password pair.
-		for(String x : args)
 		{
-			String[] xsplit = x.split("::");
-			
-			//Verifies that the argument has a username and password.
-			if(xsplit.length < 3)
+			ArrayList<Thread> threads = new ArrayList<Thread>();
+			for(String x : args)
 			{
-				System.out.println("Error with arg #" + y);
-				System.out.println("Exiting...");
-				return;
+				PvPNetClientInitializationThread t = new PvPNetClientInitializationThread(x);
+				t.start();
+				threads.add(t);
 			}
-			
-			LoadBalancer.registerNewClient(x);
-			y++;
+			for(Thread t: threads)
+			{
+				try {
+					t.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
+		System.out.println("Finished loading connecting with all clients, awaiting requests.");
 		
 		//Creates server socket and server loop
 		try 
@@ -66,7 +69,9 @@ public class Main
 			//Main Server Loop, should never exit except upon program destruction
 			while((listen = ssocket.accept()) != null)
 			{
+				listen.setSoTimeout(600000);
 				NetworkingThread thread = new NetworkingThread(listen);
+				thread.setName("NetworkingThread: " + listen.getInetAddress());
 				thread.start();
 			}
 		}

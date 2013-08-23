@@ -59,6 +59,13 @@ public class PlayerStatsService
 			}
 			json = json.substring(0,json.length()-1);
 			json += "}";
+			
+			//Handles the case where the player does not ahve ranked data for that gamemode and season
+			if(json.equals("}"))
+			{
+				json = null;
+			}
+			
 			return json;
 		} 
 		catch (IOException e)

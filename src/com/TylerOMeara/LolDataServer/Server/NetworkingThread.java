@@ -3,9 +3,9 @@ package com.TylerOMeara.LolDataServer.Server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 
 import com.TylerOMeara.LolDataServer.Server.API.GameService;
@@ -77,9 +77,27 @@ public class NetworkingThread extends Thread
 				System.out.println(response);
 			}
 		}
+		catch(SocketTimeoutException e)
+		{
+			try {
+				socket.close();
+			} catch (IOException ie) {
+				// TODO Auto-generated catch block
+				ie.printStackTrace();
+			}
+		}
 		catch(IOException e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
+		}
+		finally
+		{
+			try {
+				socket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -89,7 +107,7 @@ public class NetworkingThread extends Thread
 		String[] components = line.split("~");
 		if(components.length != 3)
 		{
-			return "Invalid request: Must contain the requested region, operation and arguments seperated by a ~. Please see documentation" +
+			return "Invalid request: Must contain the requested region, operation and arguments seperated by a ~. Please see documentation " +
 					"for more details.";
 		}
 		String region = components[0];
