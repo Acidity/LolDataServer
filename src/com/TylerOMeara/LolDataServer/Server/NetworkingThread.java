@@ -1,10 +1,10 @@
 package com.TylerOMeara.LolDataServer.Server;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.HashMap;
 
@@ -58,21 +58,24 @@ public class NetworkingThread extends Thread
 		this.socket = socket;
 	}
 	
+	//TODO timeout connections
 	public void run()
 	{
 		try
 		{
-			InputStreamReader input = new InputStreamReader(socket.getInputStream());
-			OutputStreamWriter output = new OutputStreamWriter(socket.getOutputStream());
-			BufferedReader iReader = new BufferedReader(input);
-			BufferedWriter oWriter = new BufferedWriter(output);
+			InputStreamReader isr = new InputStreamReader(socket.getInputStream());
+			BufferedReader br = new BufferedReader(isr);
+			PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
 			//Blocks until it receives the request from the client
-			String line = iReader.readLine();
-			String response = handleRequest(line);
-			oWriter.write(response);
-			//TODO DEBUG CODE
-			System.out.println(response);
-			
+			String line;
+			while((line = br.readLine()) != null)
+			{
+				String response = handleRequest(line);
+				pw.println(response);
+				
+				//TODO DEBUG CODE
+				System.out.println(response);
+			}
 		}
 		catch(IOException e)
 		{
@@ -80,6 +83,7 @@ public class NetworkingThread extends Thread
 		}
 	}
 	
+	//TODO Find out why null getRankedStats returns "}"
 	private String handleRequest(String line)
 	{
 		String[] components = line.split("~");
@@ -91,8 +95,6 @@ public class NetworkingThread extends Thread
 		String region = components[0];
 		String operation = components[1];
 		String[] arguments = components[2].split("&");
-		//TODO Handle Arg Size
-		//TODO Check if the arguments are numbers when converting
 		//Case statements are in braces to localize variables
 		String s;
 		if(!(s = checkValidArguments(operation, arguments)).equals("VALID"))

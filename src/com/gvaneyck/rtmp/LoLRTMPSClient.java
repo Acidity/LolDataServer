@@ -757,4 +757,10 @@ public class LoLRTMPSClient extends RTMPSClient
 			}
 		}
 	}
+	
+	//Tyler O'Meara
+	public String getUserName()
+	{
+		return user;
+	}
 }

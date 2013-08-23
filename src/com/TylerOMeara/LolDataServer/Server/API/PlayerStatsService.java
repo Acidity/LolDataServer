@@ -18,7 +18,7 @@ public class PlayerStatsService
 	{
 		return BaseMethods.genericAPICall(region, "playerStatsService", "retrievePlayerStatsByAccountId", new Object[]{accountID});
 	}
-	
+	//TODO GET RANKED STATS WITH CHAMP NAMES INSTEAD OF NUMS
 	public static String getRankedStats(String region, int accountID, String gameMode, String season)
 	{
 		HashMap<Integer, HashMap<String, Double>> champions = new HashMap<Integer, HashMap<String, Double>>();

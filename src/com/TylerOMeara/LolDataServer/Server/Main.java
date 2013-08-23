@@ -19,12 +19,9 @@ public class Main
 	 * Stores the PvP.Net version that the clients should use when connecting to League's servers.
 	 */
 	//TODO:Make Variable based on region
-	public static String PvPNetVersion = "3.10.13_07_26_19_59";
+	public static String PvPNetVersion = "3.10.13_08_21_11_50";
 	
-	/**
-	 * Stores all of the PvP.Net clients provided by the server admin.
-	 */
-	public static HashMap<String, HashMap<String,LoLRTMPSClient>> PvPNetClients = new HashMap<String, HashMap<String,LoLRTMPSClient>>();
+	public static LoadBalancer loadBalancer = new LoadBalancer();
 	
 	/**
 	 * Main server method.
@@ -39,12 +36,12 @@ public class Main
 		{
 			System.out.println("You must provide at least 1 username and password.");
 			//TODO: DEBUG CODE
-			args = new String[1];
+			args = new String[2];
+
 			//return;
 		}
-		
-		//Loops through the arguments and creates a new client for each username password pair.
 		int y = 1;
+		//Loops through the arguments and creates a new client for each username password pair.
 		for(String x : args)
 		{
 			String[] xsplit = x.split("::");
@@ -57,54 +54,8 @@ public class Main
 				return;
 			}
 			
-			//Handles if other clients from same region exist.
-			if(PvPNetClients.containsKey(xsplit[0]))
-			{
-				HashMap<String, LoLRTMPSClient> region = PvPNetClients.get(xsplit[0]);
-				//Creates a new client object for this particular username/pass combo
-				LoLRTMPSClient client = new LoLRTMPSClient(xsplit[0], PvPNetVersion, xsplit[1], xsplit[2]);
-				try 
-				{
-					client.connectAndLogin();
-				} 
-				catch (IOException e) 
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				//TODO DEBUG CODE
-				System.out.println("Connected to " + xsplit[0] + " with username: " + xsplit[1]);
-				
-				//Adds client to region hashmap
-				region.put(xsplit[1], client);
-				//Adds region hashmap to global clients hashmap
-				PvPNetClients.put(xsplit[0], region);
-			}
-			else //Handles first client for region.
-			{
-				//Creates a new hashmap to hold all clients for the region
-				HashMap<String, LoLRTMPSClient> region = new HashMap<String, LoLRTMPSClient>();
-				//Creates a new client object for this particular username/pass combo
-				LoLRTMPSClient client = new LoLRTMPSClient(xsplit[0], PvPNetVersion, xsplit[1], xsplit[2]);
-				try 
-				{
-					client.connectAndLogin();
-				} 
-				catch (IOException e) 
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				//TODO DEBUG CODE
-				System.out.println("Connected to " + xsplit[0] + " with username: " + xsplit[1]);
-				//Adds client to region hashmap
-				region.put(xsplit[1], client);
-				//Adds region hashmap to global clients hashmap
-				PvPNetClients.put(xsplit[0], region);
-				
-				//TODO DEBUG CODE
-				LoadBalancer.clients.put(xsplit[0], client);
-			}
+			LoadBalancer.registerNewClient(x);
+			y++;
 		}
 		
 		//Creates server socket and server loop
