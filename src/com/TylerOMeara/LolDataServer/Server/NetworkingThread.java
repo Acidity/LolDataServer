@@ -101,7 +101,7 @@ public class NetworkingThread extends Thread
 		}
 	}
 	
-	//TODO Find out why null getRankedStats returns "}"
+	//TODO Add new commands for PvP.net version and League version
 	private String handleRequest(String line)
 	{
 		String[] components = line.split("~");
@@ -113,12 +113,12 @@ public class NetworkingThread extends Thread
 		String region = components[0];
 		String operation = components[1];
 		String[] arguments = components[2].split("&");
-		//Case statements are in braces to localize variables
 		String s;
 		if(!(s = checkValidArguments(operation, arguments)).equals("VALID"))
 		{
 			return s;
 		}
+		//Case statements are in braces to localize variables
 		switch(operation)
 		{
 			case "getInGameProgressInfo":

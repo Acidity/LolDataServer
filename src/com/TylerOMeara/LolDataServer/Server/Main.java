@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 //TODO Add ability to require authentication before returning data
+//TODO Prevent retries on invalid username or password
 
 public class Main 
 {
@@ -29,6 +30,8 @@ public class Main
 	 * @param args region::username::password
 	 */
 	
+	//TODO Handle server's going down
+	
 	public static void main(String[] args)
 	{
 		//TODO: Pull Version number from args
@@ -37,19 +40,19 @@ public class Main
 		{
 			System.out.println("You must provide at least 1 username and password.");
 			//TODO: DEBUG CODE
-			args = new String[10];
+
 			//return;
 		}
 		//Loops through the arguments and creates a new client for each username password pair.
 		{
-			ArrayList<Thread> threads = new ArrayList<Thread>();
+			ArrayList<PvPNetClientInitializationThread> threads = new ArrayList<PvPNetClientInitializationThread>();
 			for(String x : args)
 			{
 				PvPNetClientInitializationThread t = new PvPNetClientInitializationThread(x);
 				t.start();
 				threads.add(t);
 			}
-			for(Thread t: threads)
+		/* for(Thread t: threads)
 			{
 				try {
 					t.join();
@@ -57,9 +60,23 @@ public class Main
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}*/
+			for(PvPNetClientInitializationThread t : threads)
+			{
+				while(t.tries <= 1 && t.isAlive())
+				{
+					try {
+						t.join(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 		}
-		System.out.println("Finished loading connecting with all clients, awaiting requests.");
+		//TODO Debug Code
+		System.out.println("All clients initiated, awaiting requests. Clients that couldn't connect will continue to " +
+				"attempt to reconnect.");
 		
 		//Creates server socket and server loop
 		try 

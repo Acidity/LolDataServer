@@ -26,7 +26,7 @@ public class LoadBalancer
 		return client;
 	}
 	
-	public static void registerNewClient(String x)
+	public static void registerNewClient(String x) throws IOException
 	{
 		String[] xsplit = x.split("::");
 		//Creates a new client object for this particular username/pass combo
@@ -43,15 +43,7 @@ public class LoadBalancer
 			//Creates a new hashmap to hold all clients for the region
 			region = new HashMap<String, LoLRTMPSClient>();
 		}
-		try 
-		{
-			client.connectAndLogin();
-		} 
-		catch (IOException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		client.connectAndLogin();
 		//TODO DEBUG CODE
 		System.out.println("Connected to " + xsplit[0] + " with username: " + xsplit[1]);
 		

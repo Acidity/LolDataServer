@@ -27,6 +27,10 @@ public class PlayerStatsService
 		{
 			int id = client.invoke("playerStatsService", "getAggregatedStats", new Object[] {accountID,gameMode,season});
 			Object[] array = (client.getResult(id).getTO("data").getTO("body").getArray("lifetimeStatistics"));
+			if(array.length == 0)
+			{
+				return "This player has no ranked stats for the specified game mode and season";
+			}
 			for(Object x : array)
 			{
 				if(x instanceof TypedObject)
