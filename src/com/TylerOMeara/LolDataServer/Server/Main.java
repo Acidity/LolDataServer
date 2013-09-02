@@ -30,8 +30,6 @@ public class Main
 	 * @param args region::username::password
 	 */
 	
-	//TODO Handle server's going down
-	
 	public static void main(String[] args)
 	{
 		//TODO: Pull Version number from args

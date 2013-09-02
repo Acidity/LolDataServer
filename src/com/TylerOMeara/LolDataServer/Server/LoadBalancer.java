@@ -2,6 +2,7 @@ package com.TylerOMeara.LolDataServer.Server;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.TylerOMeara.LolDataServer.Server.Exceptions.NullClientForRegionException;
 import com.gvaneyck.rtmp.LoLRTMPSClient;
@@ -11,7 +12,7 @@ public class LoadBalancer
 	/**
 	 * Stores all of the PvP.Net clients provided by the server admin.
 	 */
-	public static HashMap<String, HashMap<String,LoLRTMPSClient>> PvPNetClients = new HashMap<String, HashMap<String,LoLRTMPSClient>>();
+	public static ConcurrentHashMap<String, HashMap<String,LoLRTMPSClient>> PvPNetClients = new ConcurrentHashMap<String, HashMap<String,LoLRTMPSClient>>();
 	
 	/**
 	 * Returns a client from the specified region.
@@ -49,13 +50,12 @@ public class LoadBalancer
 			//Creates a new hashmap to hold all clients for the region
 			region = new HashMap<String, LoLRTMPSClient>();
 		}
-		client.connectAndLogin();
-		//TODO DEBUG CODE
-		System.out.println("Connected to " + xsplit[0] + " with username: " + xsplit[1]);
-		
 		//Adds client to region hashmap
 		region.put(xsplit[1], client);
 		//Adds region hashmap to global clients hashmap
 		PvPNetClients.put(xsplit[0], region);
+		client.connectAndLogin();
+		//TODO DEBUG CODE
+		System.out.println("Connected to " + xsplit[0] + " with username: " + xsplit[1]);
 	}
 }
