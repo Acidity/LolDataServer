@@ -119,7 +119,14 @@ class BaseMethods
 		}
 		if(data.get(x) instanceof Double)
 		{
-			json += data.getDouble(x) + ",";
+			if(doubleIsInteger(data.getDouble(x)))
+			{
+				json += data.getInt(x) + ",";
+			}
+			else
+			{
+				json += data.getDouble(x) + ",";
+			}
 			return json;
 		}
 		if(data.get(x) instanceof Boolean)
@@ -204,7 +211,14 @@ class BaseMethods
 		}
 		if(o instanceof Double)
 		{
-			json += o + ",";
+			if(doubleIsInteger((double)o))
+			{
+				json += (int)o + ",";
+			}
+			else
+			{
+				json += o + ",";
+			}
 			return json;
 		}
 		if(o instanceof Boolean)
@@ -284,5 +298,14 @@ class BaseMethods
 			return false;
 		}
 		return true;
+	}
+	
+	private static boolean doubleIsInteger(double d)
+	{
+		if((int)d == d)
+		{
+			return true;
+		}
+		return false;
 	}
 }
