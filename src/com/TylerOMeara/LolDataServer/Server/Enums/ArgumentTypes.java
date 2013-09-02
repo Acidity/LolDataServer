@@ -4,6 +4,5 @@ public enum ArgumentTypes {
 	GAMEMODE,
 	SEASON,
 	NUMBER,
-	QUEUE,
-	REGION
+	QUEUE
 }

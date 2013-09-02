@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import com.TylerOMeara.LolDataServer.Server.LoadBalancer;
+import com.TylerOMeara.LolDataServer.Server.Exceptions.NullClientForRegionException;
 import com.gvaneyck.rtmp.LoLRTMPSClient;
 import com.gvaneyck.rtmp.TypedObject;
 
@@ -22,7 +23,16 @@ public class PlayerStatsService
 	public static String getRankedStats(String region, int accountID, String gameMode, String season)
 	{
 		HashMap<Integer, HashMap<String, Double>> champions = new HashMap<Integer, HashMap<String, Double>>();
-		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		LoLRTMPSClient client;
+		try
+		{
+			client = LoadBalancer.returnClient(region);
+		} 
+		catch (NullClientForRegionException e1) 
+		{
+			return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
+					" does not have it configured to that region, or because that region is currently offline.";
+		}
 		try 
 		{
 			int id = client.invoke("playerStatsService", "getAggregatedStats", new Object[] {accountID,gameMode,season});

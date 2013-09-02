@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import com.TylerOMeara.LolDataServer.Server.LoadBalancer;
+import com.TylerOMeara.LolDataServer.Server.Exceptions.NullClientForRegionException;
 import com.gvaneyck.rtmp.LoLRTMPSClient;
 import com.gvaneyck.rtmp.TypedObject;
 
@@ -23,7 +24,16 @@ class BaseMethods
 		{
 			obj[x] = params[x];
 		}
-		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		LoLRTMPSClient client;
+		try
+		{
+			client = LoadBalancer.returnClient(region);
+		} 
+		catch (NullClientForRegionException e1) 
+		{
+			return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
+					" does not have it configured to that region, or because that region is currently offline.";
+		}
 		try 
 		{
 			int id = client.invoke(service, operation, obj);
@@ -39,7 +49,16 @@ class BaseMethods
 
 	public static String genericAPICall(String region, String service, String operation, Object[] args)
 	{
-		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		LoLRTMPSClient client;
+		try
+		{
+			client = LoadBalancer.returnClient(region);
+		} 
+		catch (NullClientForRegionException e1) 
+		{
+			return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
+					" does not have it configured to that region, or because that region is currently offline.";
+		}
 		try 
 		{
 			String json = "{";
@@ -63,7 +82,16 @@ class BaseMethods
 	
 	public static String genericRawOutput(String region, String service, String operation, Object[] args)
 	{
-		LoLRTMPSClient client = LoadBalancer.returnClient(region);
+		LoLRTMPSClient client;
+		try
+		{
+			client = LoadBalancer.returnClient(region);
+		} 
+		catch (NullClientForRegionException e1) 
+		{
+			return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
+					" does not have it configured to that region, or because that region is currently offline.";
+		}
 		try 
 		{
 			int id = client.invoke(service, operation, args);

@@ -356,18 +356,6 @@ public class NetworkingThread extends Thread
 					return false;
 				}
 			}
-			case REGION:
-			{
-				try
-				{
-					Regions.valueOf(argument);
-					return true;
-				}
-				catch(IllegalArgumentException e)
-				{
-					return false;
-				}
-			}
 			default:
 			{
 				return false;

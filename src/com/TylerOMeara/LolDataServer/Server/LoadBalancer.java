@@ -3,6 +3,7 @@ package com.TylerOMeara.LolDataServer.Server;
 import java.io.IOException;
 import java.util.HashMap;
 
+import com.TylerOMeara.LolDataServer.Server.Exceptions.NullClientForRegionException;
 import com.gvaneyck.rtmp.LoLRTMPSClient;
 
 public class LoadBalancer 
@@ -16,9 +17,14 @@ public class LoadBalancer
 	 * Returns a client from the specified region.
 	 * @param region
 	 * @return
+	 * @throws NullClientForRegionException 
 	 */
-	public static LoLRTMPSClient returnClient(String region)
+	public static LoLRTMPSClient returnClient(String region) throws NullClientForRegionException
 	{
+		if(PvPNetClients.get(region) == null)
+		{
+			throw new NullClientForRegionException("No client for region " + region + " available.", region);
+		}
 		int numClients = PvPNetClients.get(region).values().size();
 		LoLRTMPSClient client = (LoLRTMPSClient) PvPNetClients.get(region).values().toArray()[(int)(Math.random()*numClients)];
 		//TODO Debug code
