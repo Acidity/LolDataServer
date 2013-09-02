@@ -679,7 +679,9 @@ public class RTMPSClient
 							parsePackets(this);
 						}
 					};
-			curThread.setName("RTMPSClient (PacketReader)");
+			//Modified by Tyler O'Meara
+			curThread.setName("RTMPSClient (PacketReader) " + server + ":" + port);
+			//End Mod
 			curThread.setDaemon(true);
 			curThread.start();
 		}

@@ -13,6 +13,11 @@ import com.TylerOMeara.LolDataServer.Server.API.LeaguesServiceProxy;
 import com.TylerOMeara.LolDataServer.Server.API.PlayerStatsService;
 import com.TylerOMeara.LolDataServer.Server.API.SummonerService;
 import com.TylerOMeara.LolDataServer.Server.API.SummonerTeamService;
+import com.TylerOMeara.LolDataServer.Server.Enums.ArgumentTypes;
+import com.TylerOMeara.LolDataServer.Server.Enums.GameMode;
+import com.TylerOMeara.LolDataServer.Server.Enums.Queue;
+import com.TylerOMeara.LolDataServer.Server.Enums.Season;
+import com.TylerOMeara.LolDataServer.Server.Enums.Regions;
 
 public class NetworkingThread extends Thread
 {
@@ -51,6 +56,33 @@ public class NetworkingThread extends Thread
 		}
 	};
 	
+	//Separate arg locations with &
+	//... trailing a number means every arg following and including that specified
+	private static final HashMap<String, String> operationGameModeArgs = new HashMap<String, String>()
+	{
+		{
+			put("getRankedStats", "1");
+		}
+	};
+	
+	//Separate arg locations with &
+	//... trailing a number means every arg following and including that specified
+	private static final HashMap<String, String> operationQueueArgs = new HashMap<String, String>()
+	{
+		{
+			put("getLeagueForPlayer", "1");
+		}
+	};
+	
+	//Separate arg locations with &
+	//... trailing a number means every arg following and including that specified
+	private static final HashMap<String, String> operationSeasonArgs = new HashMap<String, String>()
+	{
+		{
+			put("getRankedStats", "2");
+		}
+	};
+	
 	private Socket socket;
 	
 	public NetworkingThread(Socket socket)
@@ -58,7 +90,6 @@ public class NetworkingThread extends Thread
 		this.socket = socket;
 	}
 	
-	//TODO timeout connections
 	public void run()
 	{
 		try
@@ -150,8 +181,8 @@ public class NetworkingThread extends Thread
 			case "getRankedStats":
 			{
 				int accountID = Integer.valueOf(arguments[0]);
-				String gameMode = arguments[1]; //TODO enum gameModes
-				String season = arguments[2]; //TODO enum Seasons
+				String gameMode = arguments[1];
+				String season = arguments[2];
 				return PlayerStatsService.getRankedStats(region, accountID, gameMode, season);
 			}
 			case "getSummonerByName":
@@ -192,6 +223,7 @@ public class NetworkingThread extends Thread
 	
 	private String checkValidArguments(String operation, String[] arguments)
 	{
+		//Checks if actual operation
 		if(!operationArgs.containsKey(operation))
 		{
 			return "The operation you requested could not be found: " + operation;
@@ -207,9 +239,148 @@ public class NetworkingThread extends Thread
 			return "Invalid number of arguments for the requested operation. " + operation + " requires "
 					+ operationArgs.get(operation) + " arguments.";
 		}
-		if(!operationNFEArgs.containsKey(operation))
+		
+		//Loops through all argument types and checks if all arguments for that operation that should be of one
+		//of those types is valid, otherwise it returns an error.
+		String argType;
+		for(ArgumentTypes type : ArgumentTypes.values())
+		{
+			if(!(argType = checkArgumentType(operation, arguments, type)).equals("VALID"))
+			{
+				return argType;
+			}
+		}
+		//Everything is correct
+		return "VALID";
+	}
+	
+	private static String checkArgumentType(String operation, String[] arguments, ArgumentTypes arg)
+	{
+		HashMap<String,String> hashMap = null;;
+		switch(arg)
+		{
+			case NUMBER:
+			{
+				hashMap = operationNFEArgs;
+				break;
+			}
+			case QUEUE:
+			{
+				hashMap = operationQueueArgs;
+				break;
+			}
+			case SEASON:
+			{
+				hashMap = operationSeasonArgs;
+				break;
+			}
+			case GAMEMODE:
+			{
+				hashMap = operationGameModeArgs;
+				break;
+			}
+			default:
+			{
+				hashMap = null;
+				break;
+			}
+		}
+		
+		if(!hashMap.containsKey(operation))
 		{
 			return "VALID";
+		}
+		String[] argsNums = hashMap.get(operation).split("&");
+		for(String s : argsNums)
+		{
+			if(s.contains("..."))
+			{
+				//TODO: Allow args to be individual and ...
+				for(int x = Integer.valueOf(s.substring(0,1)); x < arguments.length; x++)
+				{
+					if(!isType(arguments[x], arg))
+					{
+						return "Error: Expected argument " + x + " to be a " + arg.toString() + ".";
+					}
+				}
+			}
+			if(!isType(arguments[Integer.valueOf(s)], arg))
+			{
+				return "Error: Expected argument " + s + " to be a " + arg.toString() + ".";
+			}
+		}
+		return "VALID";
+	}
+	
+	private static boolean isType(String argument, ArgumentTypes arg)
+	{
+		switch(arg)
+		{
+			case NUMBER:
+			{
+				return isInteger(argument);
+			}
+			case QUEUE:
+			{
+				try
+				{
+					Queue.valueOf(argument);
+					return true;
+				}
+				catch(IllegalArgumentException e)
+				{
+					return false;
+				}
+			}
+			case SEASON:
+			{
+				try
+				{
+					Season.valueOf(argument);
+					return true;
+				}
+				catch(IllegalArgumentException e)
+				{
+					return false;
+				}
+			}
+			case GAMEMODE:
+			{
+				try
+				{
+					GameMode.valueOf(argument);
+					return true;
+				}
+				catch(IllegalArgumentException e)
+				{
+					return false;
+				}
+			}
+			case REGION:
+			{
+				try
+				{
+					Regions.valueOf(argument);
+					return true;
+				}
+				catch(IllegalArgumentException e)
+				{
+					return false;
+				}
+			}
+			default:
+			{
+				return false;
+			}
+		}
+	}
+	
+	@Deprecated
+	private static String checkNFE(String operation, String[] arguments)
+	{
+		if(!operationNFEArgs.containsKey(operation))
+		{
+				return "VALID";
 		}
 		String[] argsNums = operationNFEArgs.get(operation).split("&");
 		for(String s : argsNums)
@@ -232,7 +403,7 @@ public class NetworkingThread extends Thread
 		return "VALID";
 	}
 	
-	public static boolean isInteger(String s)
+	private static boolean isInteger(String s)
 	{
 		try
 		{

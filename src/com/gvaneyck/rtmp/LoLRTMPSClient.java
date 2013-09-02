@@ -750,7 +750,9 @@ public class LoLRTMPSClient extends RTMPSClient
 	            	beatHeart(this);
 	            }
 	        };
-	        curThread.setName("LoLRTMPSClient (HeartbeatThread)");
+	        //Modified by Tyler O'Meara
+	        curThread.setName("LoLRTMPSClient (HeartbeatThread) " + region + "-" + user);
+	        //End Mod
 	        curThread.setDaemon(true);
 	        curThread.start();
 		}
