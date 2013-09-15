@@ -81,6 +81,44 @@ class BaseMethods
 		return null;
 	}
 	
+/*	public static String genericAsyncAPICall(String region, String service, String operation, Object[] args)
+	{
+		LoLRTMPSClient client;
+		try
+		{
+			client = LoadBalancer.returnClient(region);
+		} 
+		catch (NullClientForRegionException e1) 
+		{
+			return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
+					" does not have it configured to that region, or because that region is currently offline.";
+		}
+		try 
+		{
+			int id = client.invokeWithCallback(service, operation, args,
+			new Callback()
+			{
+				public void callback(TypedObject result)
+				{
+					String json = "{";
+					for(String x : result.keySet())
+					{
+						json = addObject(json, result, x);
+					}
+					json = json.substring(0,json.length()-1);
+					json += "}";
+					return json;
+				}
+			});
+		}
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}*/
+	
 	public static String genericRawOutput(String region, String service, String operation, Object[] args)
 	{
 		LoLRTMPSClient client;

@@ -17,7 +17,6 @@ import com.TylerOMeara.LolDataServer.Server.Enums.ArgumentTypes;
 import com.TylerOMeara.LolDataServer.Server.Enums.GameMode;
 import com.TylerOMeara.LolDataServer.Server.Enums.Queue;
 import com.TylerOMeara.LolDataServer.Server.Enums.Season;
-import com.TylerOMeara.LolDataServer.Server.Enums.Regions;
 
 public class NetworkingThread extends Thread
 {
@@ -105,8 +104,11 @@ public class NetworkingThread extends Thread
 				pw.println(response);
 				
 				//TODO DEBUG CODE
-				System.out.println(response);
+			//	System.out.println(response);
 			}
+			pw.close();
+			br.close();
+			isr.close();
 		}
 		catch(SocketTimeoutException e)
 		{

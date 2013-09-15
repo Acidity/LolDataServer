@@ -19,7 +19,9 @@ public class PvPNetClientInitializationThread extends Thread
 		if(xsplit.length < 3)
 		{
 			System.err.println("Error with argument " + x);
+			Main.log.severe("Error with argument " + x);
 			System.err.println("Ignoring that argument...");
+			Main.log.severe("Ignoring that argument...");
 			return;
 		}
 		
@@ -50,6 +52,8 @@ public class PvPNetClientInitializationThread extends Thread
 			//e.printStackTrace();
 			System.err.println("Had an error connecting to " + x.split("::")[0] + ": " + e.getMessage());
 			System.err.println("Will continue to try to connect...");
+			Main.log.warning("Had an error connecting to " + x.split("::")[0] + ": " + e.getMessage());
+			Main.log.warning("Will continue to try to connect...");
 			return false;
 		}
 		return true;

@@ -28,8 +28,7 @@ public class LoadBalancer
 		}
 		int numClients = PvPNetClients.get(region).values().size();
 		LoLRTMPSClient client = (LoLRTMPSClient) PvPNetClients.get(region).values().toArray()[(int)(Math.random()*numClients)];
-		//TODO Debug code
-		System.out.println("Loadbalancer returned " + region + "::" + client.getUserName());
+		Main.log.fine("Loadbalancer returned " + region + "::" + client.getUserName());
 		return client;
 	}
 	
@@ -57,5 +56,6 @@ public class LoadBalancer
 		client.connectAndLogin();
 		//TODO DEBUG CODE
 		System.out.println("Connected to " + xsplit[0] + " with username: " + xsplit[1]);
+		Main.log.info("Connected to " + xsplit[0] + " with username: " + xsplit[1]);
 	}
 }
