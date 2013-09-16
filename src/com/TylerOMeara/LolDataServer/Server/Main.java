@@ -1,19 +1,23 @@
 package com.TylerOMeara.LolDataServer.Server;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import com.TylerOMeara.LolDataServer.Server.Enums.Regions;
+
 //TODO Add ability to require authentication before returning data
 //TODO Prevent retries on invalid username or password
+//TODO Limit number of clients at once
+//TODO RateLimit requests per client etc
 
 public class Main 
 {
@@ -22,15 +26,12 @@ public class Main
 	/**
 	 * Port on which the server should listen for connections.
 	 */
-	//TODO:Allow admins to change
 	public static int serverPort = 22222;
 	
 	/**
 	 * Stores the PvP.Net version that the clients should use when connecting to League's servers.
 	 */
-	//TODO:Make Variable based on region
-	//TODO Allow admins to specify
-	public static String PvPNetVersion = "3.11.13_09_11_18_32";
+	public static HashMap<String,String> PvPNetVersion = new HashMap<String, String>();
 	
 	public static LoadBalancer loadBalancer = new LoadBalancer();
 	
@@ -45,7 +46,17 @@ public class Main
 	
 	public static void main(String[] args)
 	{
-		//TODO: Add copyright notice etc.
+		System.out.println("Copyright 2013 Tyler O'Meara");
+		log.fine("Copyright 2013 Tyler O'Meara");
+		try 
+		{
+			loadConfigFile();
+		} 
+		catch (IOException e2)
+		{
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		setUpLogger();
 		System.out.println("Launching LoLDataServer v" + version);
 		log.fine("Launching LoLDataServer v" + version);
@@ -99,6 +110,8 @@ public class Main
 				"attempt to reconnect.");
 		log.info("All clients initiated, awaiting requests. Clients that couldn't connect will continue to " +
 				"attempt to reconnect.");
+		System.out.println("Server initialized on port " + serverPort);
+		log.info("Server initialized on port " + serverPort);
 		
 		//Creates server socket and server loop
 		try 
@@ -146,6 +159,39 @@ public class Main
 		while((s = br.readLine()) != null)
 		{
 			users.add(s);
+		}
+		br.close();
+	}
+	
+	public static void loadConfigFile() throws IOException
+	{
+		BufferedReader br = new BufferedReader(new FileReader("LDSconfig.txt"));
+		String s;
+		while((s = br.readLine()) != null)
+		{
+			String paramater = s.split(":")[0];
+			switch(paramater)
+			{
+				case "Port":
+					serverPort = Integer.valueOf(s.split(":")[1]);
+					break;
+				case "PvPNetVersion":
+				{
+					String region = (s.split(":")[1]).split("-")[0];
+					PvPNetVersion.put(region, (s.split(":")[1]).split("-")[1]);
+					//NOTE: All ONLY FILLS THOSE REGIONS NOT SPECIFIED.
+					if(region.equals("All"))
+					{
+						for(Regions r : Regions.values())
+						{
+							if(!PvPNetVersion.containsKey(r))
+							{
+								PvPNetVersion.put(r.toString(), (s.split(":")[1]).split("-")[1]);
+							}
+						}
+					}
+				}
+			}
 		}
 		br.close();
 	}

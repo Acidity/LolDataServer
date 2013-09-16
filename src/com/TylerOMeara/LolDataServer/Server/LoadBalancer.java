@@ -36,7 +36,7 @@ public class LoadBalancer
 	{
 		String[] xsplit = x.split("::");
 		//Creates a new client object for this particular username/pass combo
-		LoLRTMPSClient client = new LoLRTMPSClient(xsplit[0], Main.PvPNetVersion, xsplit[1], xsplit[2]);
+		LoLRTMPSClient client = new LoLRTMPSClient(xsplit[0], Main.PvPNetVersion.get(xsplit[0]), xsplit[1], xsplit[2]);
 		
 		HashMap<String, LoLRTMPSClient> region;
 		//Handles if other clients from same region exist.

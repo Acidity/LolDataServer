@@ -100,7 +100,9 @@ public class NetworkingThread extends Thread
 			String line;
 			while((line = br.readLine()) != null)
 			{
+				Main.log.fine("Received request from " + socket.getInetAddress() + " : line");
 				String response = handleRequest(line);
+				Main.log.fine("Returned to " + socket.getInetAddress() + " : " + response);
 				pw.println(response);
 				
 				//TODO DEBUG CODE
