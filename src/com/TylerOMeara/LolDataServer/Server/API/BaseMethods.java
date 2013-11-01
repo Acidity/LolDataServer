@@ -60,8 +60,8 @@ class BaseMethods
 			return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
 					" does not have it configured to that region, or because that region is currently offline.";
 		}
-		try 
-		{
+	try 
+	{
 			String json = "{";
 			int id = client.invoke(service, operation, args);
 			TypedObject data = client.getResult(id);

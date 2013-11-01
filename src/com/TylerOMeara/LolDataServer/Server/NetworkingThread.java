@@ -83,9 +83,11 @@ public class NetworkingThread extends Thread
 	};
 	
 	private Socket socket;
+	private User user;
 	
 	public NetworkingThread(Socket socket)
 	{
+		Main.log.fine("Created NetworkingThread for IP Address: " + socket.getInetAddress());
 		this.socket = socket;
 	}
 	
@@ -100,6 +102,43 @@ public class NetworkingThread extends Thread
 			String line;
 			while((line = br.readLine()) != null)
 			{
+				//TODO: Documentation - keys can't contain ':'
+				if(line.startsWith("AUTHENTICATE:"))
+				{
+					if(user != null)
+					{
+						//MUST authenticate on first line sent
+						socket.close();
+						return;
+					}
+					user = Main.clients.get(line.split(":")[1]);
+					if(user == null)
+					{
+						//TODO: Inform client of invalid key
+						Main.log.fine("Invalid Authenticate message from " + socket.getInetAddress());
+						socket.close();
+						return;
+					}
+					if(user.getIpAddress() != null && !user.getIpAddress().equals(socket.getInetAddress().toString()))
+					{
+						//TODO: Inform client of invalid IP Address
+						Main.log.fine(user.getName() + " attempted to log in from an invalid IP Address: " + socket.getInetAddress());
+						socket.close();
+						return;
+					}
+					continue;
+				}
+				if(Main.requireUsers && user == null)
+				{
+					//TODO: Inform client of need to authenticate
+					socket.close();
+					return;
+				}
+				if(user == null)
+				{
+					user = new AnonymousUser();
+					user.setIpAddress(socket.getInetAddress().toString());
+				}
 				Main.log.fine("Received request from " + socket.getInetAddress() + " : line");
 				String response = handleRequest(line);
 				Main.log.fine("Returned to " + socket.getInetAddress() + " : " + response);
@@ -134,11 +173,26 @@ public class NetworkingThread extends Thread
 				e.printStackTrace();
 			}
 		}
+		Main.log.fine("Destroyed NetworkingThread for IP Address: " + socket.getInetAddress());
 	}
 	
 	//TODO Add new commands for PvP.net version and League version
 	private String handleRequest(String line)
 	{
+		//Handles when the last check time for limits was more than the limit period ago
+		if(System.currentTimeMillis() - user.getLimitCheckTime() > user.getLimitTime()*1000)
+		{
+			user.setLimitCheckTime(System.currentTimeMillis());
+			user.setCurrentRequests(1);
+		}
+		else if(user.getCurrentRequests() < user.getRequestLimit())
+		{
+			user.iterateCurrentRequests();
+		}
+		else
+		{
+			return "You have exceeded your maximum limit of requests of " + user.getRequestLimit() + " requests per " + user.getLimitTime() + " seconds.";
+		}
 		String[] components = line.split("~");
 		if(components.length != 3)
 		{
@@ -186,7 +240,7 @@ public class NetworkingThread extends Thread
 			{
 				int accountID = Integer.valueOf(arguments[0]);
 				String gameMode = arguments[1];
-				String season = arguments[2];
+				String season = Season.convertToInt(arguments[2]);
 				return PlayerStatsService.getRankedStats(region, accountID, gameMode, season);
 			}
 			case "getSummonerByName":
@@ -260,7 +314,7 @@ public class NetworkingThread extends Thread
 	
 	private static String checkArgumentType(String operation, String[] arguments, ArgumentTypes arg)
 	{
-		HashMap<String,String> hashMap = null;;
+		HashMap<String,String> hashMap = null;
 		switch(arg)
 		{
 			case NUMBER:
@@ -345,6 +399,10 @@ public class NetworkingThread extends Thread
 				}
 				catch(IllegalArgumentException e)
 				{
+					if(isInteger(argument) && Integer.valueOf(argument) <= Season.CURRENT.getSeasonInt())
+					{
+						return true;
+					}
 					return false;
 				}
 			}

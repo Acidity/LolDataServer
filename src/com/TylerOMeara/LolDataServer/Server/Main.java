@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,7 +38,18 @@ public class Main
 	
 	public static Logger log = Logger.getLogger("LoLDataServer");
 	
+	//Max amount of time to wait for PvPNet clients to connect before accepting clients
+	private static long maxWaitTime = 10000;
+	
 	private static ArrayList<String> users = new ArrayList<String>();
+	
+	public static ConcurrentHashMap<String,User> clients = new ConcurrentHashMap<String,User>();
+	
+	public static boolean isUserAccessEnabled;
+	public static boolean isRateLimitingEnabled;
+	public static int defaultLimitTime;
+	public static int defaultLimitAmount;
+	public static boolean requireUsers;
 	
 	/**
 	 * Main server method.
@@ -95,10 +107,17 @@ public class Main
 			}*/
 			for(PvPNetClientInitializationThread t : threads)
 			{
+				int iterations = 0;
 				while(t.tries <= 1 && t.isAlive())
 				{
+					//Breaks loop for long login queues/slow connections
+					if(maxWaitTime/100 < iterations)
+					{
+						break;
+					}
 					try {
 						t.join(100);
+						iterations++;
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -170,6 +189,11 @@ public class Main
 		while((s = br.readLine()) != null)
 		{
 			String paramater = s.split(":")[0];
+			//Ignore comments in the config file
+			if(paramater.startsWith("//"))
+			{
+				continue;
+			}
 			switch(paramater)
 			{
 				case "Port":
@@ -190,7 +214,96 @@ public class Main
 							}
 						}
 					}
+					break;
 				}
+				case "AuthenticateUsers":
+				{
+					boolean value = Boolean.valueOf((s.split(":")[1])); //TODO: Check that it's a boolean
+					isUserAccessEnabled = value;
+					//TODO: Read in users file in separate thread
+					if(value)
+						loadLDSUsernameFile();
+					break;
+				}
+				case "RequireUsers":
+				{
+					requireUsers = Boolean.valueOf((s.split(":")[1]));//TODO: Check boolean
+					break;
+				}
+				case "DefaultLimit":
+				{
+					defaultLimitAmount = Integer.valueOf(s.split(":")[1]);//TODO Check integer
+					break;
+				}
+				case "LimitTime":
+				{
+					defaultLimitTime = Integer.valueOf(s.split(":")[1]);//TODO: Check Integer
+					break;
+				}
+				case "SSL":
+				{
+					//TODO
+					break;
+				}
+				case "RequireSSL":
+				{
+					//TODO
+					break;
+				}
+				default:
+					break;
+			}
+		}
+		br.close();
+	}
+	
+	//TODO: Documentation - Users must have a key
+	public static void loadLDSUsernameFile() throws IOException
+	{
+		BufferedReader br = new BufferedReader(new FileReader("LDSUsers.txt"));
+		String s;
+		boolean nested = false;
+		AuthenticatedUser u = null;
+		while((s = br.readLine()) != null)
+		{
+			if(s.startsWith("//"))
+				continue;
+			if(!nested && !s.equals("{"))
+			{
+				u = new AuthenticatedUser(s);
+				continue;
+			}
+			if(s.equals("{"))
+			{
+				nested = true;
+				continue;
+			}
+			if(s.equals("}"))
+			{
+				nested = false;
+				clients.put(u.getKey(),u);
+				continue;
+			}
+			String paramater = s.split(":")[0].trim();
+			switch(paramater)
+			{
+				case "IPAddress":
+					u.setIpAddress(s.split(":")[1]);
+					break;
+				case "Group":
+					u.setGroup(s.split(":")[1]);
+					break;
+				case "Key":
+					u.setKey(s.split(":")[1]);
+					break;
+				case "RequestLimit":
+					u.setRequestLimit(Integer.valueOf(s.split(":")[1]));//TODO: Make sure this is an integer
+					break;
+				case "LimitTime":
+					u.setLimitTime(Long.valueOf(s.split(":")[1]));//TODO: Make sure this is a long
+					break;
+				default:
+					break;
 			}
 		}
 		br.close();
