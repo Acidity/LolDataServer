@@ -7,8 +7,8 @@ public class ClientFacadeService
 	 * @param region
 	 * @return
 	 */
-	public static String getLoginDataPacketForUser(String region)
+	public static String getLoginDataPacketForUser(String region, boolean async)
 	{
-		return BaseMethods.genericAPICall(region, "clientFacadeService", "getLoginDataPacketForUser", new Object[0]);
+		return BaseMethods.genericAPICall(region, "clientFacadeService", "getLoginDataPacketForUser", async, new Object[0]);
 	}
 }

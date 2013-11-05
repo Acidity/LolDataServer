@@ -10,17 +10,19 @@ import com.gvaneyck.rtmp.TypedObject;
 
 public class PlayerStatsService 
 {
-	public static String getRecentGames(String region, int accountID)
+	public static String getRecentGames(String region, int accountID, boolean async)
 	{
-		return BaseMethods.genericAPICall(region, "playerStatsService", "getRecentGames", new Object[] {accountID});
+		return BaseMethods.genericAPICall(region, "playerStatsService", "getRecentGames", async, new Object[] {accountID});
 	}
 	
-	public static String getPlayerStatsByAccountID(String region, int accountID)
+	public static String getPlayerStatsByAccountID(String region, int accountID, boolean async)
 	{
-		return BaseMethods.genericAPICall(region, "playerStatsService", "retrievePlayerStatsByAccountId", new Object[]{accountID});
+		return BaseMethods.genericAPICall(region, "playerStatsService", "retrievePlayerStatsByAccountId", async, new Object[]{accountID});
 	}
+	
 	//TODO GET RANKED STATS WITH CHAMP NAMES INSTEAD OF NUMS
-	public static String getRankedStats(String region, int accountID, String gameMode, String season)
+	//TODO Support async calls
+	public static String getRankedStats(String region, int accountID, String gameMode, String season, boolean async)
 	{
 		HashMap<Integer, HashMap<String, Double>> champions = new HashMap<Integer, HashMap<String, Double>>();
 		LoLRTMPSClient client;

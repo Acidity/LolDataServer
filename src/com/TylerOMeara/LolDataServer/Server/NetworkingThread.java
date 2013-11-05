@@ -20,6 +20,7 @@ import com.TylerOMeara.LolDataServer.Server.Enums.Season;
 
 public class NetworkingThread extends Thread
 {
+	//Do not include the async argument
 	private static final HashMap<String, Integer> operationArgs = new HashMap<String, Integer>()
 	{
 		{
@@ -207,46 +208,58 @@ public class NetworkingThread extends Thread
 		{
 			return s;
 		}
+		
+		//Handles async argument, it's optional, may be overriden by server, and is always last
+		boolean async;
+		if(Main.overrideAsync || arguments.length == operationArgs.get(operation))
+		{
+			async = Main.async;
+		}
+		else
+		{
+			//Takes anything other than true to be false
+			async = Boolean.valueOf(arguments[arguments.length-1]);
+		}
 		//Case statements are in braces to localize variables
 		switch(operation)
 		{
 			case "getInGameProgressInfo":
 			{
 				String summonerName = arguments[0];
-				return GameService.getInGameProgressInfo(region, summonerName);
+				return GameService.getInGameProgressInfo(region, summonerName, async);
 			}
 			case "getLeagueForPlayer":
 			{
 				int summonerID = Integer.valueOf(arguments[0]);
 				String queue = arguments[1];
-				return LeaguesServiceProxy.getLeagueForPlayer(region, summonerID, queue);
+				return LeaguesServiceProxy.getLeagueForPlayer(region, summonerID, queue, async);
 			}
 			case "getAllLeaguesForPlayer":
 			{
 				int summonerID = Integer.valueOf(arguments[0]);
-				return LeaguesServiceProxy.getAllLeaguesForPlayer(region, summonerID);
+				return LeaguesServiceProxy.getAllLeaguesForPlayer(region, summonerID, async);
 			}
 			case "getRecentGames":
 			{
 				int accountID = Integer.valueOf(arguments[0]);
-				return PlayerStatsService.getRecentGames(region, accountID);
+				return PlayerStatsService.getRecentGames(region, accountID, async);
 			}
 			case "retrievePlayerStatsByAccountId":
 			{
 				int accountID = Integer.valueOf(arguments[0]);
-				return PlayerStatsService.getPlayerStatsByAccountID(region, accountID);
+				return PlayerStatsService.getPlayerStatsByAccountID(region, accountID, async);
 			}
 			case "getRankedStats":
 			{
 				int accountID = Integer.valueOf(arguments[0]);
 				String gameMode = arguments[1];
 				String season = Season.convertToInt(arguments[2]);
-				return PlayerStatsService.getRankedStats(region, accountID, gameMode, season);
+				return PlayerStatsService.getRankedStats(region, accountID, gameMode, season, async);
 			}
 			case "getSummonerByName":
 			{
 				String summonerName = arguments[0];
-				return SummonerService.getSummonerByName(region, summonerName);
+				return SummonerService.getSummonerByName(region, summonerName, async);
 			}
 			case "getSummonerNamesByIDs":
 			{
@@ -255,22 +268,22 @@ public class NetworkingThread extends Thread
 				{
 					summonerIDs[x] = Integer.valueOf(arguments[x]);
 				}
-				return SummonerService.getSummonersByIDs(region, summonerIDs);
+				return SummonerService.getSummonersByIDs(region, summonerIDs, async);
 			}
 			case "getAllPublicSummonerDataByAccount":
 			{
 				int accountID = Integer.valueOf(arguments[0]);
-				return SummonerService.getAllPublicSummonerDataByAccount(region, accountID);
+				return SummonerService.getAllPublicSummonerDataByAccount(region, accountID, async);
 			}
 			case "getAllSummonerDataByAccount":
 			{
 				int accountID = Integer.valueOf(arguments[0]);
-				return SummonerService.getAllSummonerDataByAccount(region, accountID);
+				return SummonerService.getAllSummonerDataByAccount(region, accountID, async);
 			}
 			case "getPlayerRankedTeams":
 			{
 				int summonerID = Integer.valueOf(arguments[0]);
-				return SummonerTeamService.getPlayerRankedTeams(region, summonerID);
+				return SummonerTeamService.getPlayerRankedTeams(region, summonerID, async);
 			}
 			default:
 			{
@@ -292,7 +305,7 @@ public class NetworkingThread extends Thread
 			return "Invalid number of arguments for the requested operation. " + operation + " requires at least "
 					+ operationArgs.get(operation) + " arguments.";
 		}
-		if(arguments.length != operationArgs.get(operation))
+		if(arguments.length != operationArgs.get(operation) && (arguments.length != (operationArgs.get(operation)+1) && (arguments[arguments.length-1].equals("true") || arguments[arguments.length-1].equals("false"))))
 		{
 			return "Invalid number of arguments for the requested operation. " + operation + " requires "
 					+ operationArgs.get(operation) + " arguments.";

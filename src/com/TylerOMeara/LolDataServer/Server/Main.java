@@ -50,6 +50,8 @@ public class Main
 	public static int defaultLimitTime;
 	public static int defaultLimitAmount;
 	public static boolean requireUsers;
+	public static boolean overrideAsync;
+	public static boolean async;
 	
 	/**
 	 * Main server method.
@@ -238,6 +240,16 @@ public class Main
 				case "LimitTime":
 				{
 					defaultLimitTime = Integer.valueOf(s.split(":")[1]);//TODO: Check Integer
+					break;
+				}
+				case "DefaultAsync":
+				{
+					async = Boolean.valueOf(s.split(":")[1]);
+					break;
+				}
+				case "EnforceAsyncSetting":
+				{
+					overrideAsync = Boolean.valueOf(s.split(":")[1]);
 					break;
 				}
 				case "SSL":

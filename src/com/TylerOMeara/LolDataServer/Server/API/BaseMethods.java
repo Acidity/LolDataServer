@@ -2,6 +2,7 @@ package com.TylerOMeara.LolDataServer.Server.API;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.TylerOMeara.LolDataServer.Server.LoadBalancer;
 import com.TylerOMeara.LolDataServer.Server.Exceptions.NullClientForRegionException;
@@ -11,6 +12,9 @@ import com.gvaneyck.rtmp.TypedObject;
 
 class BaseMethods 
 {
+	
+	private static ConcurrentHashMap<Integer, String> asyncResults = new ConcurrentHashMap<Integer,String>();
+	private static int ids = 0;
 	@Deprecated
 	public static String manualRequest(String line)
 	{
@@ -47,8 +51,17 @@ class BaseMethods
 			return null;
 		}
 	}
+	
+	//Removes async function from args list
+	public static String genericAPICall(String region, String service, String operation, boolean async, Object[] args)
+	{
+		if(!async)
+			return BaseMethods.genericSyncAPICall(region, service, operation, args);
+		int id = BaseMethods.genericAsyncAPICall(region, service, operation, args);
+		return BaseMethods.returnAsyncAPICallResult(id);
+	}
 
-	public static String genericAPICall(String region, String service, String operation, Object[] args)
+	public static String genericSyncAPICall(String region, String service, String operation, Object[] args)
 	{
 		LoLRTMPSClient client;
 		try
@@ -81,17 +94,29 @@ class BaseMethods
 		return null;
 	}
 	
-/*	public static String genericAsyncAPICall(String region, String service, String operation, Object[] args)
+	private static void addResult(int id, String json)
 	{
-		LoLRTMPSClient client;
+		asyncResults.put(id, json);
+	}
+	
+	public static String returnAsyncAPICallResult(int id)
+	{
+		return asyncResults.get(id);
+	}
+	
+	public static int genericAsyncAPICall(String region, String service, String operation, Object[] args)
+	{
+		LoLRTMPSClient client = null;
+		final int localID = ids++;
 		try
 		{
 			client = LoadBalancer.returnClient(region);
 		} 
 		catch (NullClientForRegionException e1) 
 		{
-			return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
-					" does not have it configured to that region, or because that region is currently offline.";
+			//TODO FIX
+			//return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
+			//		" does not have it configured to that region, or because that region is currently offline.";
 		}
 		try 
 		{
@@ -100,24 +125,37 @@ class BaseMethods
 			{
 				public void callback(TypedObject result)
 				{
-					String json = "{";
+					String json;
+					json = "{";
 					for(String x : result.keySet())
 					{
 						json = addObject(json, result, x);
 					}
 					json = json.substring(0,json.length()-1);
 					json += "}";
-					return json;
+					addResult(localID, json);
 				}
 			});
+			client.join();
+			//Wait for result to be obtained and added to hashmap
+			while(returnAsyncAPICallResult(localID) == null)
+			{
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			return localID;
 		}
 		catch (IOException e) 
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
-	}*/
+		return -1;
+	}
 	
 	public static String genericRawOutput(String region, String service, String operation, Object[] args)
 	{
