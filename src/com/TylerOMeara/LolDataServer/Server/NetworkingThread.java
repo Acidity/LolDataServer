@@ -19,7 +19,7 @@ import com.TylerOMeara.LolDataServer.Server.Enums.Queue;
 import com.TylerOMeara.LolDataServer.Server.Enums.Season;
 
 public class NetworkingThread extends Thread
-{
+{	
 	//Do not include the async argument
 	private static final HashMap<String, Integer> operationArgs = new HashMap<String, Integer>()
 	{
@@ -135,10 +135,15 @@ public class NetworkingThread extends Thread
 					socket.close();
 					return;
 				}
+				if(Main.clients.get(socket.getInetAddress().toString()) != null)
+				{
+					user = Main.clients.get(socket.getInetAddress().toString());
+				}
 				if(user == null)
 				{
 					user = new AnonymousUser();
 					user.setIpAddress(socket.getInetAddress().toString());
+					Main.clients.put(user.getIpAddress(), user);
 				}
 				Main.log.fine("Received request from " + socket.getInetAddress() + " : line");
 				String response = handleRequest(line);
