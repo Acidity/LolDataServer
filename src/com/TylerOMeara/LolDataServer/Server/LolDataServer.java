@@ -15,14 +15,19 @@ import java.util.logging.SimpleFormatter;
 
 import com.TylerOMeara.LolDataServer.Server.Enums.Regions;
 
-//TODO Add ability to require authentication before returning data
+//TODO Detect when a PvP.net client lost connection and remove it from the loadbalancer.
 //TODO Prevent retries on invalid username or password
 //TODO Limit number of clients at once
-//TODO RateLimit requests per client etc
 
-public class Main 
+/**
+ * Main class for the program, contains the main method as well as program wide variables.
+ * @author Tyler O'Meara
+ *
+ */
+
+public class LolDataServer 
 {
-	public final static String version = "1.0.0";
+	public final static String version = "0.5.0";
 	
 	/**
 	 * Port on which the server should listen for connections.
@@ -41,10 +46,19 @@ public class Main
 	//Max amount of time to wait for PvPNet clients to connect before accepting clients
 	private static long maxWaitTime = 10000;
 	
+	/**
+	 * Array to hold users from the text file before they're initialized
+	 */
 	private static ArrayList<String> users = new ArrayList<String>();
 	
+	/**
+	 * Holds the API Clients that have been connected since server start.
+	 */
+	//TODO: Remove entries that are no longer needed (not connected and past rate limiting time)
 	public static ConcurrentHashMap<String,User> clients = new ConcurrentHashMap<String,User>();
 	
+	//Config booleans
+	//TODO Move config stuff to separate file.
 	public static boolean isUserAccessEnabled;
 	public static boolean isRateLimitingEnabled;
 	public static int defaultLimitTime;
@@ -55,13 +69,15 @@ public class Main
 	
 	/**
 	 * Main server method.
-	 * @param args region::username::password
+	 * @param args region::username::password - DEPRECATED, NO LONGER USED
 	 */
 	
 	public static void main(String[] args)
 	{
 		System.out.println("Copyright 2013 Tyler O'Meara");
 		log.fine("Copyright 2013 Tyler O'Meara");
+		
+		//Loads the configuration file
 		try 
 		{
 			loadConfigFile();
@@ -71,10 +87,13 @@ public class Main
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
+		
+		//Sets up the logger for the server
 		setUpLogger();
+		
 		System.out.println("Launching LoLDataServer v" + version);
 		log.fine("Launching LoLDataServer v" + version);
-		//Check that the program has args provided.
+		//Retrieves all entries from Users.txt and checks to make sure it isn't empty, if it is
 		try 
 		{
 			loadUsernameFile();
@@ -90,6 +109,8 @@ public class Main
 			e1.printStackTrace();
 		}
 		//Loops through the arguments and creates a new client for each username password pair.
+		//These braces are to leave the arraylist outside of the scope of the main method so that it doesn't waste memory during normal
+		//server operation.
 		{
 			ArrayList<PvPNetClientInitializationThread> threads = new ArrayList<PvPNetClientInitializationThread>();
 			for(String x : users)
@@ -98,15 +119,9 @@ public class Main
 				t.start();
 				threads.add(t);
 			}
-		/* for(Thread t: threads)
-			{
-				try {
-					t.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}*/
+			//Iterates through the threads and waits maxWaitTime milliseconds for it to connect successfully.
+			//After that time it acts as if it had connected successfully and proceeds to the next thread. After looping through
+			//all the threads the server then proceeds to start accepting connections.
 			for(PvPNetClientInitializationThread t : threads)
 			{
 				int iterations = 0;
@@ -153,9 +168,14 @@ public class Main
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("Server exited.");
+		log.info("Server exited.");
 	}
 	
-	public static void setUpLogger()
+	/**
+	 * Set's up the logger for the server
+	 */
+	private static void setUpLogger()
 	{
 		try {
 			//TODO Fix logging format
@@ -173,7 +193,11 @@ public class Main
 		log.setLevel(Level.ALL);
 	}
 	
-	public static void loadUsernameFile() throws IOException
+	/**
+	 * Loads Users.txt and adds them to users
+	 * @throws IOException
+	 */
+	private static void loadUsernameFile() throws IOException
 	{
 		BufferedReader br = new BufferedReader(new FileReader("Users.txt"));
 		String s;
@@ -184,7 +208,11 @@ public class Main
 		br.close();
 	}
 	
-	public static void loadConfigFile() throws IOException
+	/**
+	 * Goes through the config and changes the proper variables based on the settings.
+	 * @throws IOException
+	 */
+	private static void loadConfigFile() throws IOException
 	{
 		BufferedReader br = new BufferedReader(new FileReader("LDSconfig.txt"));
 		String s;
@@ -269,8 +297,12 @@ public class Main
 		br.close();
 	}
 	
+	/**
+	 * Loads LDSUsers.txt
+	 * @throws IOException
+	 */
 	//TODO: Documentation - Users must have a key
-	public static void loadLDSUsernameFile() throws IOException
+	private static void loadLDSUsernameFile() throws IOException
 	{
 		BufferedReader br = new BufferedReader(new FileReader("LDSUsers.txt"));
 		String s;

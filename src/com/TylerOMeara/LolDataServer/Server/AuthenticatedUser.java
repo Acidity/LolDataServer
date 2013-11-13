@@ -1,5 +1,11 @@
 package com.TylerOMeara.LolDataServer.Server;
 
+/**
+ * Represents an API client that has authenticated itself successfully with the server.
+ * @author Tyler O'Meara
+ *
+ */
+
 public class AuthenticatedUser extends User 
 {
 	private String group;

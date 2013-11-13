@@ -86,9 +86,14 @@ public class NetworkingThread extends Thread
 	private Socket socket;
 	private User user;
 	
+	/**
+	 * Creates a new NetworkingThread to handle the given socket
+	 * @param socket
+	 */
+	
 	public NetworkingThread(Socket socket)
 	{
-		Main.log.fine("Created NetworkingThread for IP Address: " + socket.getInetAddress());
+		LolDataServer.log.fine("Created NetworkingThread for IP Address: " + socket.getInetAddress());
 		this.socket = socket;
 	}
 	
@@ -104,6 +109,7 @@ public class NetworkingThread extends Thread
 			while((line = br.readLine()) != null)
 			{
 				//TODO: Documentation - keys can't contain ':'
+				//Handles authentication statements from the API Client.
 				if(line.startsWith("AUTHENTICATE:"))
 				{
 					if(user != null)
@@ -112,47 +118,52 @@ public class NetworkingThread extends Thread
 						socket.close();
 						return;
 					}
-					user = Main.clients.get(line.split(":")[1]);
+					user = LolDataServer.clients.get(line.split(":")[1]);
 					if(user == null)
 					{
 						//TODO: Inform client of invalid key
-						Main.log.fine("Invalid Authenticate message from " + socket.getInetAddress());
+						LolDataServer.log.fine("Invalid Authenticate message from " + socket.getInetAddress());
 						socket.close();
 						return;
 					}
 					if(user.getIpAddress() != null && !user.getIpAddress().equals(socket.getInetAddress().toString()))
 					{
 						//TODO: Inform client of invalid IP Address
-						Main.log.fine(user.getName() + " attempted to log in from an invalid IP Address: " + socket.getInetAddress());
+						LolDataServer.log.fine(user.getName() + " attempted to log in from an invalid IP Address: " + socket.getInetAddress());
 						socket.close();
 						return;
 					}
 					continue;
 				}
-				if(Main.requireUsers && user == null)
+				//Checks if the server requires authentication, and if it does, closes the connection of
+				//unauthenticated users.
+				if(LolDataServer.requireUsers && user == null)
 				{
 					//TODO: Inform client of need to authenticate
 					socket.close();
 					return;
 				}
-				if(Main.clients.get(socket.getInetAddress().toString()) != null)
+				//Retrieves the user data for an unauthenticated user if they've already connected.
+				//Required to ensure that closing the connection and then restarting it won't reset the rate limiting.
+				if(user == null && LolDataServer.clients.get(socket.getInetAddress().toString()) != null)
 				{
-					user = Main.clients.get(socket.getInetAddress().toString());
+					user = LolDataServer.clients.get(socket.getInetAddress().toString());
 				}
+				//If none of the prior conditions were met, then create a new AnonymousUser to handle this API Client
 				if(user == null)
 				{
 					user = new AnonymousUser();
 					user.setIpAddress(socket.getInetAddress().toString());
-					Main.clients.put(user.getIpAddress(), user);
+					LolDataServer.clients.put(user.getIpAddress(), user);
 				}
-				Main.log.fine("Received request from " + socket.getInetAddress() + " : line");
-				String response = handleRequest(line);
-				Main.log.fine("Returned to " + socket.getInetAddress() + " : " + response);
-				pw.println(response);
 				
-				//TODO DEBUG CODE
-			//	System.out.println(response);
+				//Logging stuff is fun!
+				LolDataServer.log.fine("Received request from " + socket.getInetAddress() + " : line");
+				String response = handleRequest(line);
+				LolDataServer.log.fine("Returned to " + socket.getInetAddress() + " : " + response);
+				pw.println(response);
 			}
+			//Cleaning up readers and writers.
 			pw.close();
 			br.close();
 			isr.close();
@@ -179,10 +190,16 @@ public class NetworkingThread extends Thread
 				e.printStackTrace();
 			}
 		}
-		Main.log.fine("Destroyed NetworkingThread for IP Address: " + socket.getInetAddress());
+		LolDataServer.log.fine("Destroyed NetworkingThread for IP Address: " + socket.getInetAddress());
 	}
 	
+	/**
+	 * Methods that handles all normal API requests.
+	 * @param line Request as received by the server.
+	 * @return Returns the requested data, or an error 
+	 */
 	//TODO Add new commands for PvP.net version and League version
+	//TODO Allow for disabling of request validity
 	private String handleRequest(String line)
 	{
 		//Handles when the last check time for limits was more than the limit period ago
@@ -191,40 +208,51 @@ public class NetworkingThread extends Thread
 			user.setLimitCheckTime(System.currentTimeMillis());
 			user.setCurrentRequests(1);
 		}
+		//If it's been less than the limit period since the last check but the user is still under their max requests just add one to their requests.
 		else if(user.getCurrentRequests() < user.getRequestLimit())
 		{
 			user.iterateCurrentRequests();
 		}
+		//User has exceeded their maximum limit of requests
 		else
 		{
 			return "You have exceeded your maximum limit of requests of " + user.getRequestLimit() + " requests per " + user.getLimitTime() + " seconds.";
 		}
+		
+		//Splits the request into three parts based on ~
 		String[] components = line.split("~");
 		if(components.length != 3)
 		{
 			return "Invalid request: Must contain the requested region, operation and arguments seperated by a ~. Please see documentation " +
 					"for more details.";
 		}
+		//By definition, the region is the first part, the operation is the second, and the arguments are the third
 		String region = components[0];
 		String operation = components[1];
 		String[] arguments = components[2].split("&");
-		String s;
-		if(!(s = checkValidArguments(operation, arguments)).equals("VALID"))
+		
+		//Checks that the string sent by the client is valid
+		//Temporary variable necessary because the method returns an error statement if it is invalid.
+		String temp;
+		if(!(temp = checkValidArguments(operation, arguments)).equals("VALID"))
 		{
-			return s;
+			return temp;
 		}
 		
 		//Handles async argument, it's optional, may be overriden by server, and is always last
 		boolean async;
-		if(Main.overrideAsync || arguments.length == operationArgs.get(operation))
+		if(LolDataServer.overrideAsync || arguments.length == operationArgs.get(operation))
 		{
-			async = Main.async;
+			async = LolDataServer.async;
 		}
 		else
 		{
 			//Takes anything other than true to be false
 			async = Boolean.valueOf(arguments[arguments.length-1]);
 		}
+		
+		//Go through and assign the arguments to variables for readability reasons, and then call the necessary function to get the data.
+		//The data returned directly from the methods.
 		//Case statements are in braces to localize variables
 		switch(operation)
 		{
@@ -297,6 +325,13 @@ public class NetworkingThread extends Thread
 		}
 	}
 	
+	/**
+	 * Checks if the arguments supplied for the operation are of the valid type and quantity.
+	 * @param operation The argument supplied by the client in the second position, the argument that specifies the operation
+	 * @param arguments The argument supplied by the client in the third position, the argument that specifies the argument
+	 * @return "VALID" if the data provided is valid, an error code otherwise.
+	 */
+	
 	private String checkValidArguments(String operation, String[] arguments)
 	{
 		//Checks if actual operation
@@ -304,12 +339,14 @@ public class NetworkingThread extends Thread
 		{
 			return "The operation you requested could not be found: " + operation;
 		}
+		//TODO Consolidate this and make it more efficient
 		//Checks number of arguments.
 		if(operation.equals("getSummonerNamesByIDs") && arguments.length < operationArgs.get(operation))
 		{
 			return "Invalid number of arguments for the requested operation. " + operation + " requires at least "
 					+ operationArgs.get(operation) + " arguments.";
 		}
+		//Checks number of arguments when async is provided.
 		if(arguments.length != operationArgs.get(operation) && (arguments.length != (operationArgs.get(operation)+1) && (arguments[arguments.length-1].equals("true") || arguments[arguments.length-1].equals("false"))))
 		{
 			return "Invalid number of arguments for the requested operation. " + operation + " requires "
@@ -330,8 +367,16 @@ public class NetworkingThread extends Thread
 		return "VALID";
 	}
 	
+	/**
+	 * Checks to see if the arguments for the specified ArgumentType are in the right position.
+	 * @param operation Operation being called.
+	 * @param arguments Arguments as provided by the client, in the array in *specified order*
+	 * @param arg ArgumentType that the method should be checking
+	 * @return "VALID" if the arguments of the specified type are in correct position, error message otherwise.
+	 */
 	private static String checkArgumentType(String operation, String[] arguments, ArgumentTypes arg)
 	{
+		//Specifies which argument hashmap to use.s
 		HashMap<String,String> hashMap = null;
 		switch(arg)
 		{
@@ -362,11 +407,14 @@ public class NetworkingThread extends Thread
 			}
 		}
 		
+		//If the operation isn't in the hashmap for that argument type, that means it isn't required.
 		if(!hashMap.containsKey(operation))
 		{
 			return "VALID";
 		}
 		String[] argsNums = hashMap.get(operation).split("&");
+		
+		//Checks all of the args to see if they're proper
 		for(String s : argsNums)
 		{
 			if(s.contains("..."))
@@ -387,6 +435,13 @@ public class NetworkingThread extends Thread
 		}
 		return "VALID";
 	}
+	
+	/**
+	 * Checks if the string supplied is valid for the ArgumentType supplied
+	 * @param argument String to be checked.
+	 * @param arg ArgumentType being checked against.
+	 * @return true if the string is one of the ArgumentType, false otherwise.
+	 */
 	
 	private static boolean isType(String argument, ArgumentTypes arg)
 	{
@@ -417,6 +472,7 @@ public class NetworkingThread extends Thread
 				}
 				catch(IllegalArgumentException e)
 				{
+					//Both numbers and written out versions of Season numbers are valid
 					if(isInteger(argument) && Integer.valueOf(argument) <= Season.CURRENT.getSeasonInt())
 					{
 						return true;

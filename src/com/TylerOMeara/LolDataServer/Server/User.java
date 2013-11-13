@@ -1,5 +1,10 @@
 package com.TylerOMeara.LolDataServer.Server;
 
+/**
+ * Class for API Clients. Should not be instantiated, use one of it's children classes instead.
+ * @author Tyler O'Meara
+ *
+ */
 public class User 
 {
 	private String ipAddress;
