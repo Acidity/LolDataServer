@@ -5,6 +5,7 @@ package com.TylerOMeara.LolDataServer.Server;
  * @author Tyler O'Meara
  *
  */
+//TODO Comment code
 public class User 
 {
 	private String ipAddress;

@@ -10,9 +10,15 @@ import com.gvaneyck.rtmp.Callback;
 import com.gvaneyck.rtmp.LoLRTMPSClient;
 import com.gvaneyck.rtmp.TypedObject;
 
+/**
+ * Base API methods. Intended only to decrease amount of code and to allow for adding new methods easier, none of these should be available
+ * outside of the server.
+ * @author Tyler O'Meara
+ *
+ */
 class BaseMethods 
 {
-	
+	//Holds the results of async calls
 	private static ConcurrentHashMap<Integer, String> asyncResults = new ConcurrentHashMap<Integer,String>();
 	private static int ids = 0;
 	@Deprecated
@@ -58,7 +64,7 @@ class BaseMethods
 		if(!async)
 			return BaseMethods.genericSyncAPICall(region, service, operation, args);
 		int id = BaseMethods.genericAsyncAPICall(region, service, operation, args);
-		return BaseMethods.returnAsyncAPICallResult(id);
+		return BaseMethods.returnAsyncAPICallResult(id, true);
 	}
 
 	public static String genericSyncAPICall(String region, String service, String operation, Object[] args)
@@ -99,8 +105,10 @@ class BaseMethods
 		asyncResults.put(id, json);
 	}
 	
-	public static String returnAsyncAPICallResult(int id)
+	public static String returnAsyncAPICallResult(int id, boolean remove)
 	{
+		if(remove)
+			return asyncResults.remove(id);
 		return asyncResults.get(id);
 	}
 	
@@ -138,7 +146,7 @@ class BaseMethods
 			});
 			client.join();
 			//Wait for result to be obtained and added to hashmap
-			while(returnAsyncAPICallResult(localID) == null)
+			while(returnAsyncAPICallResult(localID, false) == null)
 			{
 				try {
 					Thread.sleep(20);
