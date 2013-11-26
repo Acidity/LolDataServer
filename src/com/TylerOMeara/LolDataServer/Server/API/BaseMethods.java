@@ -21,6 +21,7 @@ class BaseMethods
 	//Holds the results of async calls
 	private static ConcurrentHashMap<Integer, String> asyncResults = new ConcurrentHashMap<Integer,String>();
 	private static int ids = 0;
+	
 	@Deprecated
 	public static String manualRequest(String line)
 	{
@@ -58,7 +59,15 @@ class BaseMethods
 		}
 	}
 	
-	//Removes async function from args list
+	/**
+	 * Makes a call to a service on Riot's servers and formats it to JSON.
+	 * @param region Region corresponding to the server from which the data should be obtained
+	 * @param service Service from which the data should be retrieved.
+	 * @param operation Operation to be executed
+	 * @param async true if the operation should be executed asynchronously, false otherwise
+	 * @param args Holds the arguments to be sent to Riot's servers
+	 * @return JSON string containing the data
+	 */
 	public static String genericAPICall(String region, String service, String operation, boolean async, Object[] args)
 	{
 		if(!async)
@@ -67,8 +76,17 @@ class BaseMethods
 		return BaseMethods.returnAsyncAPICallResult(id, true);
 	}
 
+	/**
+	 * Makes a synchronous call to a service on Riot's servers and formats it to JSON.
+	 * @param region Region corresponding to the server from which the data should be obtained
+	 * @param service Service from which the data should be retrieved.
+	 * @param operation Operation to be executed
+	 * @param args Holds the arguments to be sent to Riot's servers
+	 * @return JSON string containing the data
+	 */
 	public static String genericSyncAPICall(String region, String service, String operation, Object[] args)
 	{
+		//Retrieve a PvP.net client from the region.
 		LoLRTMPSClient client;
 		try
 		{
@@ -79,15 +97,23 @@ class BaseMethods
 			return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
 					" does not have it configured to that region, or because that region is currently offline.";
 		}
-	try 
-	{
+		//Retrieves the data and formats it into JSON
+		try 
+		{
+			//JSON must start with a {
 			String json = "{";
+			
+			//Retrieve the data from Riot
 			int id = client.invoke(service, operation, args);
 			TypedObject data = client.getResult(id);
+			
+			//Iterate through the data and add it to the JSON string
 			for(String x : data.keySet())
 			{
 				json = addObject(json, data, x);
 			}
+			
+			//Remove the last character from the string, would be an improper ,
 			json = json.substring(0,json.length()-1);
 			json += "}";
 			return json;
@@ -100,11 +126,22 @@ class BaseMethods
 		return null;
 	}
 	
+	/**
+	 * Add an async result String to the storage hashmap
+	 * @param id ID to use as the key
+	 * @param json String to use as the value
+	 */
 	private static void addResult(int id, String json)
 	{
 		asyncResults.put(id, json);
 	}
 	
+	/**
+	 * Returns a stored async result String
+	 * @param id ID of the result
+	 * @param remove true if you want to remove the result after retrieving it
+	 * @return Stored result String
+	 */
 	public static String returnAsyncAPICallResult(int id, boolean remove)
 	{
 		if(remove)
@@ -112,9 +149,20 @@ class BaseMethods
 		return asyncResults.get(id);
 	}
 	
+	/**
+	 * Makes an asynchronous call to a service on Riot's servers and formats it to JSON.
+	 * @param region Region corresponding to the server from which the data should be obtained
+	 * @param service Service from which the data should be retrieved.
+	 * @param operation Operation to be executed
+	 * @param args Holds the arguments to be sent to Riot's servers
+	 * @return JSON string containing the data
+	 */
+	
 	public static int genericAsyncAPICall(String region, String service, String operation, Object[] args)
 	{
+		//Retrieve client for the specified region
 		LoLRTMPSClient client = null;
+		//Set the ID to be assigned to the result value
 		final int localID = ids++;
 		try
 		{
@@ -122,10 +170,11 @@ class BaseMethods
 		} 
 		catch (NullClientForRegionException e1) 
 		{
-			//TODO FIX
-			//return "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
-			//		" does not have it configured to that region, or because that region is currently offline.";
+			addResult(localID, "Connection to " + e1.getRegion() + " failed. This may be because that region does not exist, or the administrator of this server " +
+					" does not have it configured to that region, or because that region is currently offline.");
+			return(localID);
 		}
+		//Retrieves the data from Riot's servers async then formats it into json during the callback and adds it to the async result hashmap
 		try 
 		{
 			int id = client.invokeWithCallback(service, operation, args,
@@ -165,6 +214,14 @@ class BaseMethods
 		return -1;
 	}
 	
+	/**
+	 * Returns the output from Riot without modification
+	 * @param region Region corresponding to the server from which the data should be obtained
+	 * @param service Service from which the data should be retrieved.
+	 * @param operation Operation to be executed
+	 * @param args Holds the arguments to be sent to Riot's servers
+	 * @return String containing the data
+	 */
 	public static String genericRawOutput(String region, String service, String operation, Object[] args)
 	{
 		LoLRTMPSClient client;

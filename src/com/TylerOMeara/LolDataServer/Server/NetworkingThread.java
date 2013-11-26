@@ -347,7 +347,7 @@ public class NetworkingThread extends Thread
 					+ operationArgs.get(operation) + " arguments.";
 		}
 		//Checks number of arguments when async is provided.
-		if(arguments.length != operationArgs.get(operation) && (arguments.length != (operationArgs.get(operation)+1) && (arguments[arguments.length-1].equals("true") || arguments[arguments.length-1].equals("false"))))
+		if(arguments.length != operationArgs.get(operation) && (arguments.length != (operationArgs.get(operation)+1) && !(arguments[arguments.length-1].equals("true") || arguments[arguments.length-1].equals("false"))))
 		{
 			return "Invalid number of arguments for the requested operation. " + operation + " requires "
 					+ operationArgs.get(operation) + " arguments.";
