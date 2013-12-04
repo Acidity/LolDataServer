@@ -52,14 +52,18 @@ public class LoadBalancer
 	
 	/**
 	 * Creates a new PvP.net Client and adds it to the load balancer, and connects the client to Riot's servers
-	 * @param x Region::PvP.netVersion::Username::Password
+	 * @param x Region::Username::Password::PvP.netVersion
 	 * @throws IOException
 	 */
 	public static void registerNewClient(String x) throws IOException
 	{
 		String[] xsplit = x.split("::");
+		String pvpNetVersion = LolDataServer.PvPNetVersion.get(xsplit[0]);
+		//TODO Add ability to override user specific versions to LDSConfig.txt
+		if(xsplit.length == 4)
+			pvpNetVersion = xsplit[3];
 		//Creates a new client object for this particular username/pass combo
-		LoLRTMPSClient client = new LoLRTMPSClient(xsplit[0], LolDataServer.PvPNetVersion.get(xsplit[0]), xsplit[1], xsplit[2]);
+		LoLRTMPSClient client = new LoLRTMPSClient(xsplit[0], pvpNetVersion, xsplit[1], xsplit[2]);
 		
 		HashMap<String, LoLRTMPSClient> region;
 		//Handles if other clients from same region exist.
