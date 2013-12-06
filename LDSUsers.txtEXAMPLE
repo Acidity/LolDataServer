@@ -1,0 +1,21 @@
+Admin
+{
+	IPAddress:10.0.0.1
+	Group:Admins
+	Key:I Like Turtles
+	RequestLimit:2000
+	LimitTime:60
+}
+Bob
+{
+	Group:Charlie
+	Key:tadsfsadsfdsdf
+	LimitTime:1000
+	RequestLimit:100
+}
+StressTest
+{
+	Key:gsdsdsdgwefsjdbsakdbsakdsksd sad sakjbasd asdasdna,sdnasksdioqqqplm
+	LimitTime:1
+	RequestLimit:1000000
+}
