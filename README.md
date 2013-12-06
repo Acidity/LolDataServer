@@ -44,7 +44,7 @@ This is a list of all available requests. The operator of the server to which yo
 **getLeagueForPlayer**: int SummonerID, String queue - Retrieves the entire league for the specified player and queue.  
 **getAllLeaguesForPlayer**: int SummonerID - Retrieves every league that the specified player is in.  
 **getRecentGames**: int AccountID - Retrieves the last 10 games played by the specified summoner.  
-**retrievePlayerStatsByAccountID**:  int AccountID - Returns various stats about the player.  
+**retrievePlayerStatsByAccountId**:  int AccountID - Returns various stats about the player.  
 **getRankedStats**: int AccountID, String GameMode, String Season - Retrieves the ranked stats of the player for the specified game mode and season.  
 **getSummonerByName**: String SummonerName - Retrieves information about the summoner such as level, xp, SummonerID, and Account ID (and more).  
 **getSummonerNamesByIDs**: int SummonerID1, int SummonerID2... - Retrieves the corresponding summoner names for the specified IDs.  
