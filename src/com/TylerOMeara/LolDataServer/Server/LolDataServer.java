@@ -84,8 +84,8 @@ public class LolDataServer
 	public static boolean requireUsers;
 	public static boolean overrideAsync;
 	public static boolean async;
-	public static boolean enableManualRequests = true; //TODO ADD TO CONFIG
-	public static boolean debugMode = true; //TODO ADD TO CONFIG
+	public static boolean enableManualRequests = false;
+	public static boolean debugMode = false;
 	
 	/**
 	 * Main server method.
@@ -298,6 +298,16 @@ public class LolDataServer
 				case "EnforceAsyncSetting":
 				{
 					overrideAsync = Boolean.valueOf(s.split(":")[1]);
+					break;
+				}
+				case "EnableManualRequests":
+				{
+					enableManualRequests = Boolean.valueOf(s.split(":")[1]);
+					break;
+				}
+				case "Debug":
+				{
+					debugMode = Boolean.valueOf(s.split(":")[1]);
 					break;
 				}
 				case "SSL":
