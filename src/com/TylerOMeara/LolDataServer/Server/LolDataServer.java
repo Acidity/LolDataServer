@@ -85,6 +85,7 @@ public class LolDataServer
 	public static boolean overrideAsync;
 	public static boolean async;
 	public static boolean enableManualRequests = true; //TODO ADD TO CONFIG
+	public static boolean debugMode = true; //TODO ADD TO CONFIG
 	
 	/**
 	 * Main server method.

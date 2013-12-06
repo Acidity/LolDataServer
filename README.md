@@ -64,7 +64,8 @@ GameModes
 ---------
 
 CLASSIC  
-ODIN
+ODIN  
+ARAM
 
 Seasons
 -------

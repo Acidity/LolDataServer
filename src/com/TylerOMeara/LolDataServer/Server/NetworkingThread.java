@@ -255,7 +255,7 @@ public class NetworkingThread extends Thread
 		//Checks that the string sent by the client is valid
 		//Temporary variable necessary because the method returns an error statement if it is invalid.
 		boolean async = false;
-		if(!LolDataServer.enableManualRequests || !operation.equals("Manual"))
+		if((!LolDataServer.enableManualRequests || !operation.equals("Manual")) && !LolDataServer.debugMode)
 		{
 			String temp;
 			if(!(temp = checkValidArguments(operation, arguments)).equals("VALID"))
