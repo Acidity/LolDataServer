@@ -28,6 +28,7 @@ import java.util.HashMap;
 
 import com.TylerOMeara.LolDataServer.Server.API.GameService;
 import com.TylerOMeara.LolDataServer.Server.API.LeaguesServiceProxy;
+import com.TylerOMeara.LolDataServer.Server.API.MatchmakerService;
 import com.TylerOMeara.LolDataServer.Server.API.PlayerStatsService;
 import com.TylerOMeara.LolDataServer.Server.API.SummonerService;
 import com.TylerOMeara.LolDataServer.Server.API.SummonerTeamService;
@@ -54,6 +55,7 @@ public class NetworkingThread extends Thread
 			put("getAllPublicSummonerDataByAccount", 1);
 			put("getAllSummonerDataByAccount", 1);
 			put("getPlayerRankedTeams", 1);
+			put("getAvailableQueues", 0);
 		}
 	};
 	
@@ -345,6 +347,10 @@ public class NetworkingThread extends Thread
 			{
 				int summonerID = Integer.valueOf(arguments[0]);
 				return SummonerTeamService.getPlayerRankedTeams(region, summonerID, async);
+			}
+			case "getAvailableQueues":
+			{
+				return MatchmakerService.getAvailableQueues(region, async);
 			}
 			default:
 			{

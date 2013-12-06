@@ -51,6 +51,7 @@ This is a list of all available requests. The operator of the server to which yo
 **getAllPublicSummonerDataByAccount**: int AccountID - Retrieves "All public summoner data" for the account.  
 **getAllSummonerDataByAccount**: int AccountID - Retrieves "All summoner data" for the account.  
 **getPlayerRankedTeams**: int SummonerID - Gets all of the ranked teams for the player.  
+**getAvailableQueues**: null - Gets all of the available queues for the region. It doesn't matter what you put for the argument as long as you put something.
 
 Queues
 ------
