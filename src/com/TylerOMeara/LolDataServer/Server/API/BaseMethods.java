@@ -34,7 +34,7 @@ import com.gvaneyck.rtmp.TypedObject;
  * @author Tyler O'Meara
  *
  */
-class BaseMethods 
+public class BaseMethods 
 {
 	//Holds the results of async calls
 	private static ConcurrentHashMap<Integer, String> asyncResults = new ConcurrentHashMap<Integer,String>();
@@ -49,10 +49,18 @@ class BaseMethods
 		String operation = line.substring(line.indexOf(":")+1,line.indexOf("-"));
 		String temp = line.substring(line.indexOf("-")+1);
 		String[] params = temp.split(",");
-		Object[] obj = new Object[params.length];
-		for(int x = 0; x < params.length; x++)
+		Object[] obj;
+		if(line.indexOf("-") != line.length()-1)
 		{
-			obj[x] = params[x];
+			obj = new Object[params.length];
+			for(int x = 0; x < params.length; x++)
+			{
+				obj[x] = params[x];
+			}
+		}
+		else
+		{
+			obj = new Object[0];
 		}
 		LoLRTMPSClient client;
 		try

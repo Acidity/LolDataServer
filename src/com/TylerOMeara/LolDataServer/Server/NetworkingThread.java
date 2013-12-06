@@ -31,6 +31,7 @@ import com.TylerOMeara.LolDataServer.Server.API.LeaguesServiceProxy;
 import com.TylerOMeara.LolDataServer.Server.API.PlayerStatsService;
 import com.TylerOMeara.LolDataServer.Server.API.SummonerService;
 import com.TylerOMeara.LolDataServer.Server.API.SummonerTeamService;
+import com.TylerOMeara.LolDataServer.Server.API.BaseMethods;
 import com.TylerOMeara.LolDataServer.Server.Enums.ArgumentTypes;
 import com.TylerOMeara.LolDataServer.Server.Enums.GameMode;
 import com.TylerOMeara.LolDataServer.Server.Enums.Queue;
@@ -251,22 +252,26 @@ public class NetworkingThread extends Thread
 		
 		//Checks that the string sent by the client is valid
 		//Temporary variable necessary because the method returns an error statement if it is invalid.
-		String temp;
-		if(!(temp = checkValidArguments(operation, arguments)).equals("VALID"))
+		boolean async = false;
+		if(!LolDataServer.enableManualRequests || !operation.equals("Manual"))
 		{
-			return temp;
-		}
+			String temp;
+			if(!(temp = checkValidArguments(operation, arguments)).equals("VALID"))
+			{
+				return temp;
+			}
 		
-		//Handles async argument, it's optional, may be overriden by server, and is always last
-		boolean async;
-		if(LolDataServer.overrideAsync || arguments.length == operationArgs.get(operation))
-		{
-			async = LolDataServer.async;
-		}
-		else
-		{
-			//Takes anything other than true to be false
-			async = Boolean.valueOf(arguments[arguments.length-1]);
+		
+			//Handles async argument, it's optional, may be overriden by server, and is always last
+			if(LolDataServer.overrideAsync || arguments.length == operationArgs.get(operation))
+			{
+				async = LolDataServer.async;
+			}
+			else
+			{
+				//Takes anything other than true to be false
+				async = Boolean.valueOf(arguments[arguments.length-1]);
+			}
 		}
 		
 		//Go through and assign the arguments to variables for readability reasons, and then call the necessary function to get the data.
@@ -274,6 +279,11 @@ public class NetworkingThread extends Thread
 		//Case statements are in braces to localize variables
 		switch(operation)
 		{
+			//NOT a normal API call. Exists only for debugging.
+			case "Manual":
+			{
+				return BaseMethods.manualRequest(arguments[0]);
+			}
 			case "getInGameProgressInfo":
 			{
 				String summonerName = arguments[0];
