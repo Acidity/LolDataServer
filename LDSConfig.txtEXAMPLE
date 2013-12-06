@@ -1,0 +1,17 @@
+Port:22222
+PvPNetVersion:All-3.14.13_11_19_11_32
+AuthenticateUsers:true
+RequireUsers:false
+//Determines whether or not to enable secure connections
+SSL:false
+//Determines whether or not to require secure connections.
+//SSL must be enabled earlier in the file than here.
+RequireSSL:false
+//Enable limiting the number of requests in a time period by a given user.
+RateLimiting:true
+//Number of requests allowed per <LimitTime> unless otherwise specified in LDSUsers.txt
+DefaultLimit:100
+//Granularity for rate limiting in seconds
+LimitTime:900
+DefaultAsync:true
+EnforceAsyncSetting:false
