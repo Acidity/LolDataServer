@@ -40,35 +40,35 @@ Requests
 
 This is a list of all available requests. The operator of the server to which you are connecting may have disabled 1 or more of these. Please note: SummonerID DOES NOT EQUAL AccountID. They are different numbers. The requests are case-sensitive, so make sure you capitalize them properly. A list of valid queues, seasons and gamemodes is provided below.
 
-getInGameProgressInfo: String SummonerName - Retrieves various info for the game which the specified summoner is in.
-getLeagueForPlayer: int SummonerID, String queue - Retrieves the entire league for the specified player and queue.
-getAllLeaguesForPlayer: int SummonerID - Retrieves every league that the specified player is in.
-getRecentGames: int AccountID - Retrieves the last 10 games played by the specified summoner.
-retrievePlayerStatsByAccountID:  int AccountID - Returns various stats about the player.
-getRankedStats: int AccountID, String GameMode, String Season - Retrieves the ranked stats of the player for the specified game mode and season.
-getSummonerByName: String SummonerName - Retrieves information about the summoner such as level, xp, SummonerID, and Account ID (and more).
-getSummonerNamesByIDs: int SummonerID1, int SummonerID2... - Retrieves the corresponding summoner names for the specified IDs.
-getAllPublicSummonerDataByAccount: int AccountID - Retrieves "All public summoner data" for the account.
-getAllSummonerDataByAccount: int AccountID - Retrieves "All summoner data" for the account.
-getPlayerRankedTeams: int SummonerID - Gets all of the ranked teams for the player.
+getInGameProgressInfo: String SummonerName - Retrieves various info for the game which the specified summoner is in.  
+getLeagueForPlayer: int SummonerID, String queue - Retrieves the entire league for the specified player and queue.  
+getAllLeaguesForPlayer: int SummonerID - Retrieves every league that the specified player is in.  
+getRecentGames: int AccountID - Retrieves the last 10 games played by the specified summoner.  
+retrievePlayerStatsByAccountID:  int AccountID - Returns various stats about the player.  
+getRankedStats: int AccountID, String GameMode, String Season - Retrieves the ranked stats of the player for the specified game mode and season.  
+getSummonerByName: String SummonerName - Retrieves information about the summoner such as level, xp, SummonerID, and Account ID (and more).  
+getSummonerNamesByIDs: int SummonerID1, int SummonerID2... - Retrieves the corresponding summoner names for the specified IDs.  
+getAllPublicSummonerDataByAccount: int AccountID - Retrieves "All public summoner data" for the account.  
+getAllSummonerDataByAccount: int AccountID - Retrieves "All summoner data" for the account.  
+getPlayerRankedTeams: int SummonerID - Gets all of the ranked teams for the player.  
 
 Queues
 ======
 
-RANKED_SOLO_5x5
+RANKED_SOLO_5x5  
 
 GameModes
 =========
 
-CLASSIC
-ODIN
+CLASSIC  
+ODIN  
 
 Seasons
 =======
 
 You can also use the integer value for the season you want.
 
-ONE
-TWO
-THREE
-CURRENT
+ONE  
+TWO  
+THREE  
+CURRENT  
