@@ -20,20 +20,20 @@ The arguments are the necessary information required to specify what exactly you
 Regions
 =======
 
-NA      North America
-EUW     Europe West
-EUNE    Europe Nordic & East
-BR      Brazil
-TR      Turkey
-RU      Russia
-LAN     Latin America North
-LAS     Latin America South
-OCE     Oceania
-KR      Korea
-PBE     Public Beta Environment
+NA      North America  
+EUW     Europe West  
+EUNE    Europe Nordic & East  
+BR      Brazil  
+TR      Turkey  
+RU      Russia  
+LAN     Latin America North  
+LAS     Latin America South  
+OCE     Oceania  
+KR      Korea  
+PBE     Public Beta Environment  
 
 
-*note* Garena platforms are available, but untested and unsupported.
+*note:* Garena platforms are available, but untested and unsupported.
 
 Requests
 ========
