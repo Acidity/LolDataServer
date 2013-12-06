@@ -55,7 +55,9 @@ This is a list of all available requests. The operator of the server to which yo
 Queues
 ------
 
-RANKED_SOLO_5x5
+RANKED_SOLO_5x5  
+RANKED_TEAM_5x5  
+RANKED_TEAM_3x3  
 
 GameModes
 ---------
