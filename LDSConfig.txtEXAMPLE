@@ -15,3 +15,5 @@ DefaultLimit:100
 LimitTime:900
 DefaultAsync:true
 EnforceAsyncSetting:false
+EnableManualRequests:false
+Debug:false
